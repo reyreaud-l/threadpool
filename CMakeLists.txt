@@ -3,6 +3,7 @@ set(LIB threadpool)
 project(${LIB} CXX)
 
 option(BUILD_DOC "Build documentation" OFF)
+option(BUILD_TESTS "Build tests" OFF)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
@@ -13,14 +14,13 @@ endif(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
 string(TOUPPER ${CMAKE_BUILD_TYPE} BUILD_TYPE_SUFFIX)
 
 
-if (BUILD_DOC OR CMAKE_BUILD_TYPE MATCHES "RELEASE")
+if ((BUILD_DOC) OR (${CMAKE_BUILD_TYPE} MATCHES "RELEASE"))
   find_package(Doxygen REQUIRED)
 
   set(DOXYGEN_IN ${CMAKE_SOURCE_DIR}/doc/Doxyfile.in)
   set(DOXYGEN_OUT ${CMAKE_BINARY_DIR}/doc/Doxyfile)
 
   configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
-  message("Doxygen build started")
 
   add_custom_target(doc
       COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
@@ -43,8 +43,6 @@ if(NOT TARGET uninstall)
 endif()
 
 find_package(Threads REQUIRED)
-find_package(benchmark REQUIRED)
-find_package(GTest)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -pedantic")
@@ -52,7 +50,10 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g3 -O0 -fsanitize=thread")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 add_subdirectory(include)
-add_subdirectory(tests)
+
+if ((BUILD_TESTS) OR (NOT CMAKE_BUILD_TYPE MATCHES "RELEASE"))
+  add_subdirectory(tests)
+endif()
 
 message(STATUS "-------------------------------")
 message(STATUS "++ Setup: ")

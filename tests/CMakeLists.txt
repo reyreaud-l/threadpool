@@ -1,3 +1,5 @@
+include(GTest)
+
 set(TESTS_EXEC tests)
 add_executable(${TESTS_EXEC}
   main.cpp
@@ -6,8 +8,7 @@ add_executable(${TESTS_EXEC}
 )
 
 target_link_libraries(${TESTS_EXEC} PRIVATE
-  GTest::GTest
-  GTest::Main
+  gtest_main
   Threads::Threads
 )
 target_include_directories(${TESTS_EXEC} PRIVATE ${CMAKE_SOURCE_DIR}/include
