@@ -14,22 +14,20 @@ string(TOUPPER ${CMAKE_BUILD_TYPE} BUILD_TYPE_SUFFIX)
 
 
 if (BUILD_DOC OR CMAKE_BUILD_TYPE MATCHES "RELEASE")
-  find_package(Doxygen)
-  if (DOXYGEN_FOUND)
-    set(DOXYGEN_IN ${CMAKE_SOURCE_DIR}/doc/doxygen.in)
-    set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+  find_package(Doxygen REQUIRED)
 
-    configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
-    message("Doxygen build started")
+  set(DOXYGEN_IN ${CMAKE_SOURCE_DIR}/doc/Doxyfile.in)
+  set(DOXYGEN_OUT ${CMAKE_BINARY_DIR}/doc/Doxyfile)
 
-    add_custom_target(doc ALL
-        COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-        COMMENT "Generating API documentation with Doxygen"
-        VERBATIM )
-else (DOXYGEN_FOUND)
-  message(FATAL_ERROR "Doxygen need to be installed to generate the doxygen documentation")
-endif (DOXYGEN_FOUND)
+  configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
+  message("Doxygen build started")
+
+  add_custom_target(doc
+      COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      COMMENT "Generating API documentation with Doxygen"
+      VERBATIM
+  )
 endif()
 
 # Uninstall target

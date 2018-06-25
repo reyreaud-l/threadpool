@@ -196,6 +196,7 @@ inline void ThreadPool::add_worker()
 
 inline void ThreadPool::add_worker_tasks(std::size_t nb_task)
 {
+  // Instantiate a worker and emplace it in the pool.
   Worker w(this);
   _pool.emplace_back(w, nb_task);
 }
@@ -206,16 +207,20 @@ auto ThreadPool::run(Function&& f, Args&&... args)
 {
   using task_return_type = RETURN_TYPE(Function(Args...));
 
+  // Create a packaged task from the callable object to fetch its result
+  // with get_future()
   auto inner_task = std::packaged_task<task_return_type()>(
     std::bind(std::forward<Function>(f), std::forward<Args...>(args)...));
 
   auto result = inner_task.get_future();
   {
+    // Lock the queue and emplace move the ownership of the task inside
     std::lock_guard<std::mutex> lock(this->_tasks_lock);
     if (this->_stop)
       return result;
     this->_tasks.emplace(std::move(inner_task));
   }
+  // Notify one worker that a task is available
   _cv_variable.notify_one();
   return result;
 }
@@ -229,15 +234,18 @@ inline void ThreadPool::Worker::operator()(std::size_t nb_task)
 {
   for (std::size_t i = 0; i != nb_task || nb_task == 0; i++)
   {
+    // Thread is waiting
     _pool->_waiting_threads += 1;
     std::unique_lock<std::mutex> lock(_pool->_tasks_lock);
     _pool->_cv_variable.wait(
       lock, [&] { return _pool->_stop || !_pool->_tasks.empty(); });
-    _pool->_waiting_threads -= 1;
-    _pool->_working_threads += 1;
 
+    // Pool is stopped, discard task and exit
     if (_pool->_stop)
       return;
+
+    _pool->_waiting_threads -= 1;
+    _pool->_working_threads += 1;
 
     // Fetch task
     std::packaged_task<void()> task = std::move(_pool->_tasks.front());
@@ -246,6 +254,8 @@ inline void ThreadPool::Worker::operator()(std::size_t nb_task)
     // Release lock and exec task
     lock.unlock();
     task();
+
+    // Task done
     _pool->_working_threads -= 1;
   }
 }

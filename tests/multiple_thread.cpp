@@ -7,6 +7,7 @@ protected:
   {
     pool = std::unique_ptr<ThreadPool>(new ThreadPool(10));
   }
+
   std::unique_ptr<ThreadPool> pool;
 };
 
@@ -41,22 +42,33 @@ TEST_F(MultipleThread, MultipleTask)
 
 TEST_F(MultipleThread, OccupyAllThreads)
 {
+  // Check that all threads are working under heavy load
   std::size_t nb_tests = 10;
-  std::vector<std::future<bool>> results;
+  std::vector<std::future<std::pair<std::thread::id, bool>>> results;
+  std::set<std::thread::id> threads_id;
+  std::mutex m;
   results.reserve(nb_tests);
 
   for (std::size_t i = 0; i < nb_tests; i++)
-    results[i] = pool->run([]() -> bool {
+    results[i] = pool->run([]() {
       // Occupy thread for 3 secs
       std::this_thread::sleep_for(std::chrono::seconds(3));
-      return true;
+      return std::make_pair(std::this_thread::get_id(), true);
     });
   // Wait for all tasks to be dispatched
   std::this_thread::sleep_for(std::chrono::seconds(1));
 
+  // Check that all threads are working
   ASSERT_EQ(pool->threads_available(), 0);
   ASSERT_EQ(pool->threads_working(), 10);
 
+  // Check results
   for (std::size_t i = 0; i < nb_tests; i++)
-    ASSERT_TRUE(results[i].get());
+  {
+    auto p = results[i].get();
+    ASSERT_TRUE(p.second);
+
+    // As all threads should be occupied, no task should run in the same thread
+    ASSERT_TRUE(threads_id.insert(p.first).second);
+  }
 }
