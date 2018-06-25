@@ -210,7 +210,7 @@ auto ThreadPool::run(Function&& f, Args&&... args)
   // Create a packaged task from the callable object to fetch its result
   // with get_future()
   auto inner_task = std::packaged_task<task_return_type()>(
-    std::bind(std::forward<Function>(f), std::forward<Args...>(args)...));
+    std::bind(std::forward<Function&&>(f), std::forward<Args&&...>(args)...));
 
   auto result = inner_task.get_future();
   {

@@ -30,10 +30,9 @@ TEST_F(SingleThread, MultipleTask)
 {
   std::size_t nb_tests = 10;
   std::vector<std::future<bool>> results;
-  results.reserve(nb_tests);
 
   for (std::size_t i = 0; i < nb_tests; i++)
-    results[i] = pool->run([]() -> bool { return true; });
+    results.push_back(pool->run([]() -> bool { return true; }));
 
   for (std::size_t i = 0; i < nb_tests; i++)
     ASSERT_TRUE(results[i].get());

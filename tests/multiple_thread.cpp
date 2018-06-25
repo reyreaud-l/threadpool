@@ -31,10 +31,9 @@ TEST_F(MultipleThread, MultipleTask)
 {
   std::size_t nb_tests = 2;
   std::vector<std::future<bool>> results;
-  results.reserve(nb_tests);
 
   for (std::size_t i = 0; i < nb_tests; i++)
-    results[i] = pool->run([]() -> bool { return true; });
+    results.push_back(pool->run([]() -> bool { return true; }));
 
   for (std::size_t i = 0; i < nb_tests; i++)
     ASSERT_TRUE(results[i].get());
@@ -46,15 +45,13 @@ TEST_F(MultipleThread, OccupyAllThreads)
   std::size_t nb_tests = 2;
   std::vector<std::future<std::pair<std::thread::id, bool>>> results;
   std::set<std::thread::id> threads_id;
-  std::mutex m;
-  results.reserve(nb_tests);
 
   for (std::size_t i = 0; i < nb_tests; i++)
-    results[i] = pool->run([]() {
+    results.push_back(pool->run([]() {
       // Occupy thread for 3 secs
       std::this_thread::sleep_for(std::chrono::seconds(3));
       return std::make_pair(std::this_thread::get_id(), true);
-    });
+    }));
   // Wait for all tasks to be dispatched
   std::this_thread::sleep_for(std::chrono::seconds(1));
 
