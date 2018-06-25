@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.9)
 set(LIB threadpool)
 project(${LIB} CXX)
 
@@ -15,19 +15,7 @@ string(TOUPPER ${CMAKE_BUILD_TYPE} BUILD_TYPE_SUFFIX)
 
 
 if ((BUILD_DOC) OR (${CMAKE_BUILD_TYPE} MATCHES "RELEASE"))
-  find_package(Doxygen REQUIRED)
-
-  set(DOXYGEN_IN ${CMAKE_SOURCE_DIR}/doc/Doxyfile.in)
-  set(DOXYGEN_OUT ${CMAKE_BINARY_DIR}/doc/Doxyfile)
-
-  configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
-
-  add_custom_target(doc
-      COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-      COMMENT "Generating API documentation with Doxygen"
-      VERBATIM
-  )
+  add_subdirectory(doc)
 endif()
 
 # Uninstall target

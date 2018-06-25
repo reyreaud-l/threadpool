@@ -8,7 +8,7 @@ branches:
 env:
   global:
     - GH_REPO_NAME: threadpool
-    - DOXYGEN_HTML: $TRAVIS_BUILD_DIR/build/doc_doxygen/html
+    - DOXYGEN_HTML: $TRAVIS_BUILD_DIR/build/doc/html
     - GH_REPO_REF: github.com/reyreaud-l/threadpool.git
 
 addons:

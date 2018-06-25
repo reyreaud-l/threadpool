@@ -5,7 +5,7 @@ class MultipleThread : public ::testing::Test
 protected:
   virtual void SetUp() final
   {
-    pool = std::unique_ptr<ThreadPool>(new ThreadPool(10));
+    pool = std::unique_ptr<ThreadPool>(new ThreadPool(2));
   }
 
   std::unique_ptr<ThreadPool> pool;
@@ -29,7 +29,7 @@ TEST_F(MultipleThread, SingleTask)
 
 TEST_F(MultipleThread, MultipleTask)
 {
-  std::size_t nb_tests = 10;
+  std::size_t nb_tests = 2;
   std::vector<std::future<bool>> results;
   results.reserve(nb_tests);
 
@@ -43,7 +43,7 @@ TEST_F(MultipleThread, MultipleTask)
 TEST_F(MultipleThread, OccupyAllThreads)
 {
   // Check that all threads are working under heavy load
-  std::size_t nb_tests = 10;
+  std::size_t nb_tests = 2;
   std::vector<std::future<std::pair<std::thread::id, bool>>> results;
   std::set<std::thread::id> threads_id;
   std::mutex m;
@@ -60,7 +60,7 @@ TEST_F(MultipleThread, OccupyAllThreads)
 
   // Check that all threads are working
   ASSERT_EQ(pool->threads_available(), 0);
-  ASSERT_EQ(pool->threads_working(), 10);
+  ASSERT_EQ(pool->threads_working(), 2);
 
   // Check results
   for (std::size_t i = 0; i < nb_tests; i++)
