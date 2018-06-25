@@ -22,52 +22,150 @@
 class ThreadPool
 {
 public:
+  /*! \brief Constructs a ThreadPool with pool_size workers.
+   */
   ThreadPool(std::size_t pool_size);
+
+  /*! \brief Constructs a ThreadPool with pool_size workers, and max_pool_size
+   *  maximum workers.
+   */
   ThreadPool(std::size_t pool_size, std::size_t max_pool_size);
+
+  /*! \brief Stops the pool and clean all workers.
+   *
+   */
   ~ThreadPool();
 
-  // Dispatch a task in the thread pool
+  /*! \brief Run a task in the ThreadPool.
+   *  \returns Return a future containing the result of the task.
+   *
+   *  When a task is ran in the ThreadPool, the callable object will be packaged
+   *  in a packaged_task and put in the inner task_queue. A waiting worker will
+   *  pick the task and execute it. If no workers are available, the task will
+   *  remain in the queue until a worker picks it up.
+   */
   template <typename Function, typename... Args>
   auto run(Function&& f, Args&&... args)
     -> std::future<RETURN_TYPE(Function(Args...))>;
 
-  // Stop the thread pool and notify all workers to stop
+  /*! \brief Stop the ThreadPool.
+   *
+   * A stopped ThreadPool will discard any task dispatched to it. All workers
+   * will exit.
+   */
   void stop();
 
-  // Getters to fetch current pool status
+  /*! \brief Returns if the ThreadPool is stopped.
+   *
+   */
   bool is_stop() const;
+
+  /*! \brief Returns the number of threads currently waiting for a task.
+   *
+   * The number might be imprecise, as between the time the value is read and
+   * returned, a thread might become unavailable.
+   */
   std::size_t threads_available() const;
+
+  /*! \brief Returns the number of threads currently executing a task.
+   *
+   * The number might be imprecise, as between the time the value is read and
+   * returned, a thread might finish a task and become available.
+   */
   std::size_t threads_working() const;
 
 private:
+  /*! \brief Inner worker class. Capture the ThreadPool when built.
+   *
+   *  The only job of this class is to run tasks. It will use the captured
+   *  ThreadPool to interact with it.
+   */
   struct Worker
   {
   public:
+    /*! Construct a worker.
+     * \param pool The ThreadPool the worker works for.
+     */
     Worker(ThreadPool* pool);
 
-    // Run nb_task tasks. If nb_task is zero, run until pool stops.
+    /*! \brief Poll task from the queue.
+     *  \param nb_task Number of tasks to run and then exit. If 0 then run until
+     *  the ThreadPool stops.
+     */
     void operator()(std::size_t nb_task);
 
   private:
+    /*! \brief Captured ThreadPool that the worker works for.
+     */
     ThreadPool* _pool;
   };
 
+  /*! \brief Starts the pool when the pool is constructed.
+   *
+   *  It will starts _pool_size threads.
+   */
   void start_pool();
+
+  /*! \brief Joins all threads in the pool.
+   *
+   *  Should only be called from destructor.
+   */
   void clean();
 
+  /*! \brief Start a worker running until the ThreadPool stops.
+   */
   void add_worker();
-  void add_worker_tasks(std::size_t);
 
+  /*! \brief Start a worker for a nb_task.
+   *  \param nb_task Number of tasks to execute.
+   */
+  void add_worker_tasks(std::size_t nb_task);
+
+  /*! \brief Number of waiting threads in the pool.
+   */
   std::atomic<std::size_t> _waiting_threads;
+
+  /*! \brief Number of threads executing a task in the pool.
+   */
   std::atomic<std::size_t> _working_threads;
+
+  /*! \brief Size of the pool.
+   */
   const std::size_t _pool_size;
+
+  /*! \brief Max possible size of the pool.
+   *
+   *  This parameter is used to add additional threads if
+   */
   const std::size_t _max_pool_size;
 
-  std::vector<std::thread> _pool;
-  std::queue<std::packaged_task<void()>> _tasks;
-  std::condition_variable _cv_variable;
+  /*! \brief Boolean representing if the pool is stopped.
+   *
+   * Not an atomic as access to this boolean is always done under locking using
+   * _tasks_lock_mutex.
+   */
   bool _stop = false;
+
+  /*! \brief Vector of thread, the actual thread pool.
+   *
+   *  Emplacing in this vector construct and launch a thread.
+   */
+  std::vector<std::thread> _pool;
+
+  /*! \brief The task queue.
+   *
+   *  Access to this task queue should **always** be done while locking using
+   *  _tasks_lock mutex.
+   */
+  std::queue<std::packaged_task<void()>> _tasks;
+
+  /*! \brief Mutex regulating acces to _tasks.
+   */
   std::mutex _tasks_lock;
+
+  /*! \brief Condition variable used in workers to wait for an available task.
+   */
+  std::condition_variable _cv_variable;
 };
 
 inline ThreadPool::ThreadPool(std::size_t pool_size)
@@ -168,7 +266,8 @@ inline void ThreadPool::stop()
 inline void ThreadPool::clean()
 {
   for (auto& t : _pool)
-    t.join();
+    if (t.joinable())
+      t.join();
 }
 
 inline bool ThreadPool::is_stop() const

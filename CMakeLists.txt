@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.1)
 set(LIB threadpool)
 project(${LIB} CXX)
 
+option(BUILD_DOC "Build documentation" OFF)
+
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 # CMake generators if no build type is set.
@@ -9,6 +11,26 @@ if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE RELEASE)
 endif(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
 string(TOUPPER ${CMAKE_BUILD_TYPE} BUILD_TYPE_SUFFIX)
+
+
+if (BUILD_DOC OR CMAKE_BUILD_TYPE MATCHES "RELEASE")
+  find_package(Doxygen)
+  if (DOXYGEN_FOUND)
+    set(DOXYGEN_IN ${CMAKE_SOURCE_DIR}/doc/doxygen.in)
+    set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+
+    configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
+    message("Doxygen build started")
+
+    add_custom_target(doc ALL
+        COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        COMMENT "Generating API documentation with Doxygen"
+        VERBATIM )
+else (DOXYGEN_FOUND)
+  message(FATAL_ERROR "Doxygen need to be installed to generate the doxygen documentation")
+endif (DOXYGEN_FOUND)
+endif()
 
 # Uninstall target
 if(NOT TARGET uninstall)
