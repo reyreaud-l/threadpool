@@ -8,8 +8,10 @@ Modern C++ Thread Pool
 * Fetch number of waiting/working workers.
 
 # Install
-To install, run the following commands
+To install, run the following commands to clone the repository and install
 ```bash
+$ git clone git@github.com:reyreaud-l/threadpool.git
+$ cd threadpool
 $ mkdir build
 $ cd build
 $ make install
