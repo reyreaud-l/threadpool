@@ -5,6 +5,7 @@ add_executable(${TESTS_EXEC}
   main.cpp
   single_thread.cpp
   multiple_thread.cpp
+  variable_thread.cpp
 )
 
 target_link_libraries(${TESTS_EXEC} PRIVATE

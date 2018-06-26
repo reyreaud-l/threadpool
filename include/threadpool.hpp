@@ -112,14 +112,22 @@ private:
    */
   void clean();
 
-  /*! \brief Start a worker running until the ThreadPool stops.
-   */
-  void add_worker();
-
   /*! \brief Start a worker for a nb_task.
    *  \param nb_task Number of tasks to execute.
+   *
+   *  If nb_task is 0 (default arg) the worker will remain alive until
+   *  threadpool is stopped.
    */
-  void add_worker_tasks(std::size_t nb_task);
+  void add_worker(std::size_t nb_task = 0);
+
+  /*! \brief Check if the pool can spawn more workers, and spawn one for a
+   *  single task
+   *
+   *  It will check the current number of spawned threads and if it can spawn
+   *  or not a new thread. If a thread can be spawned, one is created for a
+   *  single task.
+   */
+  void check_spawn_single_worker();
 
   /*! \brief Number of waiting threads in the pool.
    */
@@ -189,12 +197,7 @@ inline void ThreadPool::start_pool()
     this->add_worker();
 }
 
-inline void ThreadPool::add_worker()
-{
-  this->add_worker_tasks(0);
-}
-
-inline void ThreadPool::add_worker_tasks(std::size_t nb_task)
+inline void ThreadPool::add_worker(std::size_t nb_task)
 {
   // Instantiate a worker and emplace it in the pool.
   Worker w(this);
@@ -214,8 +217,12 @@ auto ThreadPool::run(Function&& f, Args&&... args)
 
   auto result = inner_task.get_future();
   {
+    this->check_spawn_single_worker();
+
+    // If the pool can spawn more workers, spawn one for a single task
     // Lock the queue and emplace move the ownership of the task inside
     std::lock_guard<std::mutex> lock(this->_tasks_lock);
+
     if (this->_stop)
       return result;
     this->_tasks.emplace(std::move(inner_task));
@@ -223,6 +230,16 @@ auto ThreadPool::run(Function&& f, Args&&... args)
   // Notify one worker that a task is available
   _cv_variable.notify_one();
   return result;
+}
+
+inline void ThreadPool::check_spawn_single_worker()
+{
+  // Check if we are allowed to spawn a worker
+  if (this->_max_pool_size > this->_pool_size)
+    // Check if we have space to spawn a worker, and if it is valuable.
+    if (this->_working_threads.load() + this->_waiting_threads.load() <
+        this->_max_pool_size)
+      this->add_worker(1);
 }
 
 inline ThreadPool::Worker::Worker(ThreadPool* pool)
