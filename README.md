@@ -14,17 +14,14 @@ $ git clone git@github.com:reyreaud-l/threadpool.git
 $ cd threadpool
 $ mkdir build
 $ cd build
+$ cmake ..
 $ make install
 ```
 
 # Doc
-Documentation can be found [here](https://reyreaud-l.github.io/threadpool/)
+Documentation is available on [ReadTheDoc](https://threadpool.readthedocs.io/en/latest/)
 
-To build it, enable option `BUILD_DOC` with cmake
-```bash
-$ cmake -DBUILD_DOC=ON ..
-$ make doc
-```
+You will find multiples examples and a how to get started.
 
 # Uninstall
 To uninstall, run the following command in build directory.
