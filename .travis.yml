@@ -1,34 +1,15 @@
 sudo: false
 
-branches:
-  except:
-    - gh-pages
-
-# Environment variables
-env:
-  global:
-    - GH_REPO_NAME: threadpool
-    - DOXYGEN_HTML: $TRAVIS_BUILD_DIR/build/doc/html
-    - GH_REPO_REF: github.com/reyreaud-l/threadpool.git
+git:
+  quiet: true
 
 addons:
   apt:
     packages:
-      - doxygen
-      - doxygen-doc
-      - doxygen-latex
-      - doxygen-gui
-      - graphviz
       - cmake
 
 script:
   - mkdir build
   - cd build
-  - cmake -DBUILD_TESTS=ON -DBUILD_DOC=ON ..
+  - cmake -DBUILD_TESTS=ON ..
   - make check
-  - make doc
-
-after_success:
-  - cd $TRAVIS_BUILD_DIR
-  - chmod +x gen_doc_gh_page.sh
-  - ./gen_doc_gh_pages.sh

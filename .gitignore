@@ -1,5 +1,7 @@
-build/
-doc/Doxyfile
+doxyxml
+_build
+build
+
 # Prerequisites
 *.d
 

@@ -13,7 +13,7 @@ protected:
 
 // This tests abuse from sleep to simulate heaavy coreload.
 // In practice if a task is really quick to run and you launch them in a quick
-// succession, a new thread might not spawn
+// succession, a new thread might not spawn.
 TEST_F(VariableThread, CheckSpawnThread)
 {
   // Check that all threads are working under heavy load
