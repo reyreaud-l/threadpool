@@ -10,7 +10,8 @@ Welcome to threadpool's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   threadpool
+   getting_started
+
 
 
 
