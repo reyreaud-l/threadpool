@@ -29,7 +29,7 @@ def setup(app):
 
 # -- Project information -----------------------------------------------------
 
-project = 'threadpool'
+project = 'ThreadPool'
 copyright = '2018, Loic Reyreaud'
 author = 'Loic Reyreaud'
 
@@ -124,7 +124,7 @@ htmlhelp_basename = 'threadpooldoc'
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'threadpool.tex', 'threadpool Documentation',
+    (master_doc, 'threadpool.tex', 'ThreadPool Documentation',
      'Loic Reyreaud', 'manual'),
 ]
 
@@ -134,7 +134,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'threadpool', 'threadpool Documentation',
+    (master_doc, 'ThreadPool', 'ThreadPool Documentation',
      [author], 1)
 ]
 
@@ -145,7 +145,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'threadpool', 'threadpool Documentation',
-     author, 'threadpool', 'One line description of project.',
+    (master_doc, 'ThreadPool', 'ThreadPool Documentation',
+     author, 'ThreadPool', 'ThreadPool implementation in modern C++',
      'Miscellaneous'),
 ]
