@@ -42,7 +42,7 @@ Note that we instantiate a task and wait for it to make sure the task is ran.
 With such a short program, it is possible that mypool will be deleted before a
 working is woke up to pick the task and run it. Waiting for the result ensure
 the task is ran. It is possible to use this syntax if you don't care about the
-return value or want to wait for a task to end
+return value or don't want to wait for a task to end:
 
 .. code-block:: c++
 

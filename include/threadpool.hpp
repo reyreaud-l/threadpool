@@ -13,31 +13,39 @@
 #if __cplusplus >= 201500
 // FIXME: should be next line but fails
 // #define RETURN_TYPE(X) std::invoke_result_t<X>
-// so instead use deprecated version
+// so instead use deprecated version in both cases.
 #define RETURN_TYPE(X) typename std::result_of<X>::type
 #else
 #define RETURN_TYPE(X) typename std::result_of<X>::type
 #endif
 
+/*! \brief ThreadPool is a class representing a group of threads.
+ *
+ *  When created, the pool will start the workers(threads) immediatly. The
+ *  threads will only terminate when the pool is destroyed.
+ */
 class ThreadPool
 {
 public:
-  /*! \brief Constructs a ThreadPool with pool_size workers.
+  /*! \brief Constructs a ThreadPool.
+   *  \param pool_size Number of threads to start.
    */
   ThreadPool(std::size_t pool_size);
 
-  /*! \brief Constructs a ThreadPool with pool_size workers, and max_pool_size
-   *  maximum workers.
+  /*! \brief Constructs a ThreadPool.
+   *  \param pool_size Number of threads to start.
+   *  \param max_pool_size Maximum number of threads allowed, this will be used
+   *  by the pool to extend the number of threads temporarily when all threads
+   *  are used.
    */
   ThreadPool(std::size_t pool_size, std::size_t max_pool_size);
 
   /*! \brief Stops the pool and clean all workers.
-   *
    */
   ~ThreadPool();
 
   /*! \brief Run a task in the ThreadPool.
-   *  \returns Return a future containing the result of the task.
+   *  \returns Returns a future containing the result of the task.
    *
    *  When a task is ran in the ThreadPool, the callable object will be packaged
    *  in a packaged_task and put in the inner task_queue. A waiting worker will
@@ -51,23 +59,25 @@ public:
   /*! \brief Stop the ThreadPool.
    *
    * A stopped ThreadPool will discard any task dispatched to it. All workers
-   * will exit.
+   * will discard new tasks, but the threads will not exit.
    */
   void stop();
 
-  /*! \brief Returns if the ThreadPool is stopped.
-   *
+  /*! \brief Check the state of the threadpool
+   *  \returns True if the bool is stopped, false otherwise.
    */
   bool is_stop() const;
 
-  /*! \brief Returns the number of threads currently waiting for a task.
+  /*! \brief Check on the number of threads not currently working.
+   *  \returns The number of threads currently waiting for a task.
    *
    * The number might be imprecise, as between the time the value is read and
    * returned, a thread might become unavailable.
    */
   std::size_t threads_available() const;
 
-  /*! \brief Returns the number of threads currently executing a task.
+  /*! \brief Check on the number of threads currently working.
+   *  \returns The number of threads currently working.
    *
    * The number might be imprecise, as between the time the value is read and
    * returned, a thread might finish a task and become available.
@@ -217,9 +227,9 @@ auto ThreadPool::run(Function&& f, Args&&... args)
 
   auto result = inner_task.get_future();
   {
+    // If the pool can spawn more workers, spawn one for a single task
     this->check_spawn_single_worker();
 
-    // If the pool can spawn more workers, spawn one for a single task
     // Lock the queue and emplace move the ownership of the task inside
     std::lock_guard<std::mutex> lock(this->_tasks_lock);
 
@@ -285,6 +295,7 @@ inline ThreadPool::~ThreadPool()
 
 inline void ThreadPool::stop()
 {
+  // Should stop also call clean and stop the threads ?
   std::lock_guard<std::mutex> lock(this->_tasks_lock);
   this->_stop = true;
   this->_cv_variable.notify_all();
