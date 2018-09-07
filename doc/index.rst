@@ -11,9 +11,8 @@ Welcome to threadpool's documentation!
    :caption: Contents:
 
    getting_started
-
-
-
+   pool_control
+   all_doc
 
 Indices and tables
 ==================
