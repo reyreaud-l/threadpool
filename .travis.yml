@@ -11,5 +11,5 @@ addons:
 script:
   - mkdir build
   - cd build
-  - cmake -DBUILD_TESTS=ON ..
+  - cmake -DBUILD_TESTS=ON -DBUILD_EXAMPLES=ON ..
   - make check
