@@ -1,4 +1,4 @@
-# ThreadPool
+# ThreadPool [![Build Status: master](https://travis-ci.org/reyreaud-l/threadpool.svg?branch=master)](https://travis-ci.org/reyreaud-l/threadpool) [![Doc Status: master](https://readthedocs.org/projects/threadpool/badge/?version=latest)](https://threadpool.readthedocs.io/en/latest/)
 Modern C++ Thread Pool
 
 # Available features

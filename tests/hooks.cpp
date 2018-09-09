@@ -41,8 +41,10 @@ TEST_F(Hooks, CheckAllHooksCalled)
   pool->register_hooks(hooks);
   ASSERT_FALSE(hooks->check_pre_task);
   ASSERT_FALSE(hooks->check_post_task);
+
   auto res = pool->run([]() { return 0; });
   res.wait();
+
   ASSERT_TRUE(hooks->check_pre_task);
   ASSERT_TRUE(hooks->check_post_task);
 }

@@ -19,7 +19,7 @@ find_package(Threads REQUIRED)
 # Compilation settings (for tests mainly)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -pedantic")
-set(CMAKE_CXX_FLAGS_DEBUG "-g3 -O0 -fsanitize=address")
+set(CMAKE_CXX_FLAGS_DEBUG "-g3 -O0")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 add_subdirectory(include)
