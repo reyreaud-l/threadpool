@@ -16,4 +16,4 @@ target_link_libraries(${TESTS_EXEC} PRIVATE
 target_include_directories(${TESTS_EXEC} PRIVATE ${CMAKE_SOURCE_DIR}/include
   ${CMAKE_SOURCE_DIR}/tests)
 
-add_custom_target(check ${TESTS_EXEC} DEPENDS ${TESTS_EXEC} COMMENT "Running tests")
+add_custom_target(check ${TESTS_EXEC} DEPENDS ${TESTS_EXEC} COMMENT "Running tests...")

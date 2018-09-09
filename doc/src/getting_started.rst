@@ -24,19 +24,9 @@ First Pool
 
 Let's see a simple use of the threadpool
 
-.. code-block:: c++
-
-  #include <iostream>
-  #include <threadpool/threadpool.hpp>
-
-  int main()
-  {
-    ThreadPool mypool(1);
-    auto task = mypool.run([]() { std::cout << "Hello there!" << std::endl; });
-    std::cout << "General Kenobi!" << std::endl;
-    task.wait();
-  }
-
+.. literalinclude:: examples/simple.cpp
+  :language: c++
+  :linenos:
 
 Note that we instantiate a task and wait for it to make sure the task is ran.
 With such a short program, it is possible that mypool will be deleted before a

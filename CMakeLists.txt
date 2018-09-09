@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.9)
 set(LIB threadpool)
-project(${LIB} LANGUAGES CXX VERSION 0.1)
+project(${LIB} LANGUAGES CXX VERSION 1.0)
 
 option(BUILD_TESTS "Build tests" OFF)
+option(BUILD_EXAMPLES "Build examples" OFF)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
@@ -26,6 +27,11 @@ add_subdirectory(include)
 # Tests
 if ((BUILD_TESTS) OR (NOT CMAKE_BUILD_TYPE MATCHES "RELEASE"))
   add_subdirectory(tests)
+endif()
+
+# Examples
+if (BUILD_EXAMPLES)
+  add_subdirectory(doc/src/examples)
 endif()
 
 message(STATUS "-------------------------------")

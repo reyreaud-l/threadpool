@@ -147,9 +147,9 @@ public:
    *  \param hooks The class to be registered
    *  \warning This function member makes a copy of the hooks given in
    *  parameter. If you wish to not make a copy, please use a shared_ptr and the
-   *  other overloading to register a hook
+   *  other overloading to register a hook.
    */
-  void register_hooks(Hooks hooks);
+  void register_hooks(ThreadPool::Hooks hooks);
 
   /*! \brief Register a ThreadPool::Hooks class.
    *  \param hooks The class to be registered
@@ -158,7 +158,7 @@ public:
    *  want to avoid copies and share ownership of the hook (to collect data for
    *  example and acces it in the main thread after).
    */
-  void register_hooks(std::shared_ptr<Hooks> hooks);
+  void register_hooks(std::shared_ptr<ThreadPool::Hooks> hooks);
 
 private:
   /*! \brief Inner worker class. Capture the ThreadPool when built.
