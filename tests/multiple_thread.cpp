@@ -48,7 +48,7 @@ TEST_F(MultipleThread, OccupyAllThreads)
 
   for (std::size_t i = 0; i < nb_tests; i++)
     results.push_back(pool->run([]() {
-      // Occupy thread for 3 secs
+      // Occupy thread for 5 secs
       std::this_thread::sleep_for(std::chrono::seconds(5));
       return std::make_pair(std::this_thread::get_id(), true);
     }));

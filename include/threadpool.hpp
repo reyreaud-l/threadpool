@@ -125,6 +125,22 @@ public:
      *  the worker will hold and not pick a task until the hook is completed.
      */
     virtual void post_task_hook();
+
+    /*! \brief Hook called when a worker is added for a single task.
+     *
+     *  This hook will be called by the main thread (the thread making the call
+     *  to run). It is called only when the ThreadPool automatically scales to
+     *  add one more worker. The initials workers created by the ThreadPool will
+     *  not notify this hook.
+     */
+    virtual void on_worker_add();
+
+    /*! \brief Hook called when a worker dies.
+     *
+     *  This hook will be called by the thread the ThreadPool is detroyed with.
+     *  All workers will notify this hook.
+     */
+    virtual void on_worker_die();
   };
 
   // I don't like this implementation with a shared pointer. I don't know why
@@ -365,7 +381,11 @@ inline void ThreadPool::clean()
 {
   for (auto& t : _pool)
     if (t.joinable())
+    {
+      if (_hooks)
+        _hooks->on_worker_die();
       t.join();
+    }
 }
 
 inline void ThreadPool::add_worker(std::size_t nb_task)
@@ -382,7 +402,11 @@ inline void ThreadPool::check_spawn_single_worker()
     // Check if we have space to spawn a worker, and if it is valuable.
     if (this->_working_threads.load() + this->_waiting_threads.load() <
         this->_max_pool_size)
+    {
+      if (_hooks)
+        _hooks->on_worker_add();
       this->add_worker(1);
+    }
 }
 
 // Worker implementation
@@ -430,3 +454,5 @@ inline void ThreadPool::Worker::operator()(std::size_t nb_task)
 
 THREADPOOL_DEFAULT_HOOK(pre_task_hook)
 THREADPOOL_DEFAULT_HOOK(post_task_hook)
+THREADPOOL_DEFAULT_HOOK(on_worker_add)
+THREADPOOL_DEFAULT_HOOK(on_worker_die)

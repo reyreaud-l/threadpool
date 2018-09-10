@@ -6,12 +6,15 @@ Writing hooks
 Hooks are written by creating a class or a struct which inherits from the class
 :code:`ThreadPool::Hooks`. You can then override whichever hooks you need.
 
-Here are the hooks you can override.
+Tasks Hooks
+~~~~~~~~~~~
+.. doxygenfunction:: ThreadPool::Hooks::pre_task_hook()
+.. doxygenfunction:: ThreadPool::Hooks::post_task_hook()
 
-.. doxygenstruct:: ThreadPool::Hooks
-   :members:
-   :protected-members:
-   :no-link:
+Workers Hooks
+~~~~~~~~~~~~~
+.. doxygenfunction:: ThreadPool::Hooks::on_worker_add()
+.. doxygenfunction:: ThreadPool::Hooks::on_worker_die()
 
 Registering hooks
 -----------------

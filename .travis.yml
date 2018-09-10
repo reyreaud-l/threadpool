@@ -16,6 +16,7 @@ script:
   - cd build
   - cmake -DBUILD_TESTS=ON -DBUILD_EXAMPLES=ON ..
   - make check
+  - make examples
 
 matrix:
   fast_finish: true
