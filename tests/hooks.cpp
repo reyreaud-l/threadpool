@@ -44,6 +44,10 @@ TEST_F(Hooks, CheckAllHooksCalled)
 
   auto res = pool->run([]() { return 0; });
   res.wait();
+  // Sometimes the thread running the test make the assert before the post_task
+  // hook is called by the worker. We wait a bit of time to make sure that the
+  // worker has time to call the hook before we assert.
+  std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
   ASSERT_TRUE(hooks->check_pre_task);
   ASSERT_TRUE(hooks->check_post_task);
@@ -57,6 +61,8 @@ TEST_F(Hooks, TestCopyHook)
     pool->register_hooks(test);
     auto res = pool->run([]() { return 0; });
     res.wait();
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
     // copy was made, so it should be false
     ASSERT_FALSE(hooks->check_pre_task);
     ASSERT_FALSE(hooks->check_post_task);
