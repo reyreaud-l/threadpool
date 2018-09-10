@@ -10,10 +10,19 @@ Unreleased
 ----------
 Added
 ~~~~~~~
+- Code examples from the doc are now buildable standalone programs.
+- Tasks hooks.
+- Workers hooks.
 - Documentation generation with breath and sphinx.
 - Deploy documentation on read the doc.
 - Uninstall target in CMake.
 - Changelog section in documentation.
+
+Changed
+~~~~~~~
+- CI now check linux/osx with multiples compiler.
+- Documentation is now hosted on read the doc. The documentation now also
+  includes doxygen using breathe sphinx plugin.
 
 [1.0.0] - 2018-06-26
 --------------------
@@ -26,4 +35,5 @@ Added
 
 List of releases
 ----------------
-`Unreleased <https://github.com/reyreaud-l/threadpool/compare/v1.0.0...HEAD>`_
+- `Unreleased <https://github.com/reyreaud-l/threadpool/compare/v1.0.0...HEAD>`_
+- `v1.0 <https://github.com/reyreaud-l/threadpool/compare/3e51279...v1.0.0>`_
