@@ -8,6 +8,9 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 
 Unreleased
 ----------
+
+[2.0.0] - 2018-09-21
+--------------------
 Added
 ~~~~~~~
 - Code examples from the doc are now buildable standalone programs.
@@ -36,4 +39,5 @@ Added
 List of releases
 ----------------
 - `Unreleased <https://github.com/reyreaud-l/threadpool/compare/v1.0.0...HEAD>`_
-- `v1.0 <https://github.com/reyreaud-l/threadpool/compare/3e51279...v1.0.0>`_
+- `2.0.0 <https://github.com/reyreaud-l/threadpool/compare/v1.0.0...v2.0.0>`_
+- `1.0.0 <https://github.com/reyreaud-l/threadpool/compare/3e51279...v1.0.0>`_

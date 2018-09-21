@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.9)
 set(LIB threadpool)
-project(${LIB} LANGUAGES CXX VERSION 1.0)
+project(${LIB} LANGUAGES CXX VERSION 2.0.0)
 
 option(BUILD_TESTS "Build tests" OFF)
 option(BUILD_EXAMPLES "Build examples" OFF)
