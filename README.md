@@ -1,13 +1,16 @@
-# ThreadPool
+# ThreadPool [![Build Status: master](https://travis-ci.org/reyreaud-l/threadpool.svg?branch=master)](https://travis-ci.org/reyreaud-l/threadpool) [![Doc Status: master](https://readthedocs.org/projects/threadpool/badge/?version=latest)](https://threadpool.readthedocs.io/en/latest/)
 Modern C++ Thread Pool
 
 # Available features
 * Fixed size pool.
 * Variable size pool.
-* Fetch result of task run in the pool with `future`.
+* Fetch results of tasks run in the pool with `future`.
 * Fetch number of waiting/working workers.
+* Hooks to monitor the threadpool (tasks/workers)
 
-# Install
+# Getting ThreadPool
+
+## Install
 To install, run the following commands to clone the repository and install
 ```bash
 $ git clone git@github.com:reyreaud-l/threadpool.git
@@ -17,19 +20,53 @@ $ cd build
 $ cmake ..
 $ make install
 ```
-
-# Doc
-Documentation is available on [ReadTheDoc](https://threadpool.readthedocs.io/en/latest/)
-
-You will find multiples examples and a how to get started.
-
-# Uninstall
+## Uninstall
 To uninstall, run the following command in build directory.
 ```bash
 $ make uninstall
 ```
 
-# Tests
+# Using ThreadPool
+
+## Documentation
+Documentation is available on [ReadTheDoc](https://threadpool.readthedocs.io/en/latest/)
+
+You will find multiples examples and a how to get started.
+
+## Compatibility
+ThreadPool is tested on these platforms/compilers:
+- Linux
+  - gcc
+    - 4.9
+    - 5
+    - 6
+    - 7
+  - clang
+    - 3.6
+    - 3.7
+    - 3.8
+    - 3.9
+    - 4.0
+    - 5.0
+- OSX
+  - gcc
+    - 5
+    - 6
+    - 7
+  - clang xcode
+    - 8.3
+    - 9.1
+
+# Contributing ThreadPool
+
+## Contribute
+To contribute, simply submit a PR to the repository or create and issue and I'll
+take a look at it. Feel free to do whatever you want as well!
+
+The unreleased modification are on the `staging` branch. The `master` branch
+contains all the releases.
+
+## Tests
 To tests, enable option `BUILD_TESTS` or build in `DEBUG` mode with either:
 ```bash
 $ cmake -DBUILD_TESTS=ON ..

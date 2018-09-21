@@ -33,6 +33,5 @@ Checking the pool
 
 You can check the current state of the workers with:
 
-
 .. doxygenfunction:: ThreadPool::threads_available()
 .. doxygenfunction:: ThreadPool::threads_working()

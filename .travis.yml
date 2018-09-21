@@ -1,5 +1,5 @@
+language: none
 sudo: false
-
 git:
   quiet: true
 
@@ -9,7 +9,187 @@ addons:
       - cmake
 
 script:
+  - if [ $TRAVIS_OS_NAME = "osx" ]; then brew update >/dev/null; fi
+  - if [ $TRAVIS_OS_NAME = "osx" ] && [ $BREW_SKIP = "false" ]; then brew install $BREW_INSTALL; fi
+  - if [ $TRAVIS_OS_NAME = "osx" ]; then brew upgrade cmake; fi
   - mkdir build
   - cd build
-  - cmake -DBUILD_TESTS=ON ..
+  - cmake -DBUILD_TESTS=ON -DBUILD_EXAMPLES=ON ..
   - make check
+  - make examples
+
+matrix:
+  fast_finish: true
+  include:
+    # Begin gcc
+    - os: linux
+      name: "Linux GCC 4.9"
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.9
+      env:
+        - CC=gcc-4.9
+        - CXX=g++-4.9
+
+    - os: linux
+      name: "Linux GCC 5"
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-5
+      env:
+        - CC=gcc-5
+        - CXX=g++-5
+
+    - os: linux
+      name: "Linux GCC 6"
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-6
+      env:
+        - CC=gcc-6
+        - CXX=g++-6
+
+    - os: linux
+      name: "Linux GCC 7"
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+      env:
+        - CC=gcc-7
+        - CXX=g++-7
+    # End gcc
+
+    # Begin Clang
+    - os: linux
+      name: "Linux Clang 3.6"
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.6
+          packages:
+            - clang-3.6
+      env:
+        - CC=clang-3.6
+        - CXX=clang++-3.6
+
+    - os: linux
+      name: "Linux Clang 3.7"
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.7
+          packages:
+            - clang-3.7
+      env:
+        - CC=clang-3.7
+        - CXX=clang++-3.7
+
+    - os: linux
+      name: "Linux Clang 3.8"
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.8
+          packages:
+            - clang-3.8
+      env:
+        - CC=clang-3.8
+        - CXX=clang++-3.8
+
+    - os: linux
+      name: "Linux Clang 3.9"
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-3.9
+          packages:
+            - clang-3.9
+      env:
+        - CC=clang-3.9
+        - CXX=clang++-3.9
+
+    - os: linux
+      name: "Linux Clang 4.0"
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-4.0
+          packages:
+            - clang-4.0
+      env:
+        - CC=clang-4.0
+        - CXX=clang++-4.0
+
+    - os: linux
+      name: "Linux Clang 5.0"
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-5.0
+          packages:
+            - clang-5.0
+      env:
+        - CC=clang-5.0
+        - CXX=clang++-5.0
+    # End Clang
+
+    # Begin gcc OSX
+    - os: osx
+      name: "OSX GCC 5"
+      osx_image: xcode8
+      env:
+        - BREW_SKIP=false
+        - BREW_INSTALL=gcc@5
+        - CC=gcc-5
+        - CXX=g++-5
+
+    - os: osx
+      name: "OSX GCC 6"
+      osx_image: xcode8
+      env:
+        - BREW_SKIP=false
+        - BREW_INSTALL=gcc@6
+        - CC=gcc-6
+        - CXX=g++-6
+
+    - os: osx
+      name: "OSX GCC 7"
+      osx_image: xcode8
+      env:
+        - BREW_SKIP=false
+        - BREW_INSTALL=gcc@7
+        - CC=gcc-7
+        - CXX=g++-7
+    # End gcc OSX
+
+    # Begin clang OSX
+    - os: osx
+      name: "OSX Clang xcode8.3"
+      osx_image: xcode8.3
+      compiler: clang
+      env:
+        - BREW_SKIP=true
+
+    - os: osx
+      name: "OSX Clang xcode9.1"
+      osx_image: xcode9.1
+      compiler: clang
+      env:
+        - BREW_SKIP=true
+    # End clang OSX
+
