@@ -11,6 +11,8 @@ Unreleased
 Changed
 ~~~~~~~
 - Remove hook copy overload (it was wrong)
+- Changed dependency management (gtest/gbench) to be downloaded at compile time
+  and not at configure time.
 
 [2.0.0] - 2018-09-21
 --------------------
