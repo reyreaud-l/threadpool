@@ -100,22 +100,3 @@ TEST_F(Hooks, TestWorkerHooksCalled)
   ASSERT_EQ(hooks->check_worker_add, 2);
   ASSERT_EQ(hooks->check_worker_die, 3);
 }
-
-TEST_F(Hooks, TestCopyHook)
-{
-  // Test the overloading which makes a copy
-  {
-    TestHooks test;
-    pool->register_hooks(test);
-    auto res = pool->run([]() { return 0; });
-    res.wait();
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
-    // copy was made, so it should be false
-    ASSERT_FALSE(hooks->check_pre_task);
-    ASSERT_FALSE(hooks->check_post_task);
-  }
-  // Check that a copy is made. If no copy were made, this would crash
-  auto res = pool->run([]() { return 0; });
-  res.wait();
-}

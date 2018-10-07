@@ -143,36 +143,21 @@ public:
     virtual void on_worker_die();
   };
 
-  // I don't like this implementation with a shared pointer. I don't know why
-  // but it makes me feel uncomfortable.
-  //
-  // Our options are:
-  // shared_ptr: easy solution. But do we really need shared ownership ? I don't
-  // think it's necessary for such a simple interface.
-  // unique_ptr: user probably wants to keep ownership of the hooks if it uses
-  // them to store data. It would require a way to give back ownership to user
-  // (ie give/take ala rust).
-  // weak_ptr: requires the user to make a shared_ptr. Would clear the weak_ptr
-  // when the shared_ptr is destroyed (which does not happen with raw pointer)
-  // reference: would be ideal, but need to be initialized to a dummy hook
-  // interface at the beginning. Very easy to mess up ownership and acces and to
-  // a stack use after scope error.
-  //
+  /* I don't like this implementation with a shared pointer. I don't know why
+     but it makes me feel uncomfortable.
+
+     Our options are:
+     shared_ptr: easy solution. But do we really need shared ownership ? I don't
+     think it's necessary for such a simple interface.
+     unique_ptr: user probably wants to keep ownership of the hooks if it uses
+     them to store data. It would require a way to give back ownership to user
+     (ie give/take ala rust).
+     weak_ptr: requires the user to make a shared_ptr. Would clear the weak_ptr
+     when the shared_ptr is destroyed (which does not happen with raw pointer)
+  */
 
   /*! \brief Register a ThreadPool::Hooks class.
    *  \param hooks The class to be registered
-   *  \warning This function member makes a copy of the hooks given in
-   *  parameter. If you wish to not make a copy, please use a shared_ptr and the
-   *  other overloading to register a hook.
-   */
-  void register_hooks(ThreadPool::Hooks hooks);
-
-  /*! \brief Register a ThreadPool::Hooks class.
-   *  \param hooks The class to be registered
-   *
-   *  Prefer this method with a shared_ptr to the one without if you
-   *  want to avoid copies and share ownership of the hook (to collect data for
-   *  example and acces it in the main thread after).
    */
   void register_hooks(std::shared_ptr<ThreadPool::Hooks> hooks);
 
@@ -358,14 +343,9 @@ inline std::size_t ThreadPool::threads_working() const
   return this->_working_threads.load();
 }
 
-inline void ThreadPool::register_hooks(ThreadPool::Hooks hooks)
-{
-  _hooks = std::shared_ptr<ThreadPool::Hooks>(new ThreadPool::Hooks(hooks));
-}
-
 inline void ThreadPool::register_hooks(std::shared_ptr<ThreadPool::Hooks> hooks)
 {
-  _hooks = std::ref(hooks);
+  _hooks = hooks;
 }
 
 // ThreadPool implementation
