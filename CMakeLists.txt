@@ -24,9 +24,10 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 add_subdirectory(include)
 
-# Tests
-if ((BUILD_TESTS) OR (NOT CMAKE_BUILD_TYPE MATCHES "RELEASE"))
+# Tests and bench
+if (BUILD_TESTS)
   add_subdirectory(tests)
+  add_subdirectory(bench)
 endif()
 
 # Examples
