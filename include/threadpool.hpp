@@ -19,6 +19,20 @@
 #define RETURN_TYPE(X) typename std::result_of<X>::type
 #endif
 
+#define CALL_HOOK_WORKER(HOOK)                                                 \
+  do                                                                           \
+  {                                                                            \
+    if (_pool->_hooks)                                                         \
+      _pool->_hooks->HOOK();                                                   \
+  } while (0)
+
+#define CALL_HOOK_POOL(HOOK)                                                   \
+  do                                                                           \
+  {                                                                            \
+    if (_hooks)                                                                \
+      _hooks->HOOK();                                                          \
+  } while (0)
+
 #define THREADPOOL_DEFAULT_HOOK(NAME)                                          \
   inline void ThreadPool::Hooks::NAME()                                        \
   {                                                                            \
@@ -362,8 +376,7 @@ inline void ThreadPool::clean()
   for (auto& t : _pool)
     if (t.joinable())
     {
-      if (_hooks)
-        _hooks->on_worker_die();
+      CALL_HOOK_POOL(on_worker_die);
       t.join();
     }
 }
@@ -383,8 +396,7 @@ inline void ThreadPool::check_spawn_single_worker()
     if (this->_working_threads.load() + this->_waiting_threads.load() <
         this->_max_pool_size)
     {
-      if (_hooks)
-        _hooks->on_worker_add();
+      CALL_HOOK_POOL(on_worker_add);
       this->add_worker(1);
     }
 }
@@ -411,8 +423,7 @@ inline void ThreadPool::Worker::operator()(std::size_t nb_task)
     if (_pool->_stop)
       return;
 
-    if (_pool->_hooks)
-      _pool->_hooks->pre_task_hook();
+    CALL_HOOK_WORKER(pre_task_hook);
 
     _pool->_waiting_threads -= 1;
     _pool->_working_threads += 1;
@@ -425,8 +436,7 @@ inline void ThreadPool::Worker::operator()(std::size_t nb_task)
     lock.unlock();
     task();
 
-    if (_pool->_hooks)
-      _pool->_hooks->post_task_hook();
+    CALL_HOOK_WORKER(post_task_hook);
     // Task done
     _pool->_working_threads -= 1;
   }
