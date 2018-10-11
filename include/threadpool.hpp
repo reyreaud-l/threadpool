@@ -10,6 +10,9 @@
 #include <type_traits>
 #include <vector>
 
+#include "hooks.hpp"
+#include "sqmw.hpp"
+
 #if __cplusplus >= 201500
 // FIXME: should be next line but fails
 // #define RETURN_TYPE(X) std::invoke_result_t<X>
@@ -19,31 +22,12 @@
 #define RETURN_TYPE(X) typename std::result_of<X>::type
 #endif
 
-#define CALL_HOOK_WORKER(HOOK)                                                 \
-  do                                                                           \
-  {                                                                            \
-    if (_pool->_hooks)                                                         \
-      _pool->_hooks->HOOK();                                                   \
-  } while (0)
-
-#define CALL_HOOK_POOL(HOOK)                                                   \
-  do                                                                           \
-  {                                                                            \
-    if (_hooks)                                                                \
-      _hooks->HOOK();                                                          \
-  } while (0)
-
-#define THREADPOOL_DEFAULT_HOOK(NAME)                                          \
-  inline void ThreadPool::Hooks::NAME()                                        \
-  {                                                                            \
-    return;                                                                    \
-  }
-
 /*! \brief ThreadPool is a class representing a group of threads.
  *
  *  When created, the pool will start the workers(threads) immediatly. The
  *  threads will only terminate when the pool is destroyed.
  */
+template <typename Impl>
 class ThreadPool
 {
 public:
@@ -110,59 +94,6 @@ public:
    */
   std::size_t threads_working() const;
 
-  /*! \brief Inner class containing hooks the ThreadPool will call.
-   *
-   *  This class is used as an interface to allow user defined hooks to be
-   *  registered.
-   */
-  struct Hooks
-  {
-    /*! \brief Default constructor
-     */
-    Hooks() = default;
-
-    /*! \brief Default virtual destructor.
-     *
-     *  Make sure user defined destructor will be called.
-     */
-    virtual ~Hooks() = default;
-
-    /*! \brief Hook called before picking a task.
-     *
-     *  This hook will be called by a worker before a task is executed. The
-     *  worker will not have anything locked when calling the hook. The worker
-     *  will call in a "working" state. That means that if the hook takes too
-     *  long, the worker will hold on the task execution and not run it.
-     *
-     */
-    virtual void pre_task_hook();
-
-    /*! \brief Hook called after a task is done.
-     *
-     *  This hook will be called by a worker after a task is done. The worker
-     *  will not have anything locked when calling the hook. The worker will
-     *  call in a "working" state. That means that if the hook takes too long,
-     *  the worker will hold and not pick a task until the hook is completed.
-     */
-    virtual void post_task_hook();
-
-    /*! \brief Hook called when a worker is added for a single task.
-     *
-     *  This hook will be called by the main thread (the thread making the call
-     *  to run). It is called only when the ThreadPool automatically scales to
-     *  add one more worker. The initials workers created by the ThreadPool will
-     *  not notify this hook.
-     */
-    virtual void on_worker_add();
-
-    /*! \brief Hook called when a worker dies.
-     *
-     *  This hook will be called by the thread the ThreadPool is detroyed with.
-     *  All workers will notify this hook.
-     */
-    virtual void on_worker_die();
-  };
-
   /* I don't like this implementation with a shared pointer. I don't know why
      but it makes me feel uncomfortable.
 
@@ -179,282 +110,77 @@ public:
   /*! \brief Register a ThreadPool::Hooks class.
    *  \param hooks The class to be registered
    */
-  void register_hooks(std::shared_ptr<ThreadPool::Hooks> hooks);
+  void register_hooks(std::shared_ptr<Hooks> hooks);
 
 private:
-  /*! \brief Inner worker class. Capture the ThreadPool when built.
-   *
-   *  The only job of this class is to run tasks. It will use the captured
-   *  ThreadPool to interact with it.
-   */
-  struct Worker
-  {
-  public:
-    /*! \brief Construct a worker.
-     *  \param pool The ThreadPool the worker works for.
-     */
-    Worker(ThreadPool* pool);
-
-    /*! \brief Poll task from the queue.
-     *  \param nb_task Number of tasks to run and then exit. If 0 then run until
-     *  the ThreadPool stops.
-     */
-    void operator()(std::size_t nb_task);
-
-  private:
-    /*! \brief Captured ThreadPool that the worker works for.
-     */
-    ThreadPool* _pool;
-  };
-
-  /*! \brief Starts the pool when the pool is constructed.
-   *
-   *  It will starts _pool_size threads.
-   */
-  void start_pool();
-
-  /*! \brief Joins all threads in the pool.
-   *
-   *  Should only be called from destructor.
-   */
-  void clean();
-
-  /*! \brief Start a worker for a nb_task.
-   *  \param nb_task Number of tasks to execute.
-   *
-   *  If nb_task is 0 (default arg) the worker will remain alive until
-   *  threadpool is stopped.
-   */
-  void add_worker(std::size_t nb_task = 0);
-
-  /*! \brief Check if the pool can spawn more workers, and spawn one for a
-   *  single task
-   *
-   *  It will check the current number of spawned threads and if it can spawn
-   *  or not a new thread. If a thread can be spawned, one is created for a
-   *  single task.
-   */
-  void check_spawn_single_worker();
-
-  /*! \brief Number of waiting threads in the pool.
-   */
-  std::atomic<std::size_t> _waiting_threads;
-
-  /*! \brief Number of threads executing a task in the pool.
-   */
-  std::atomic<std::size_t> _working_threads;
-
-  /*! \brief Size of the pool.
-   */
-  const std::size_t _pool_size;
-
-  /*! \brief Max possible size of the pool.
-   *
-   *  This parameter is used to add additional threads if
-   */
-  const std::size_t _max_pool_size;
-
-  /*! \brief Boolean representing if the pool is stopped.
-   *
-   * Not an atomic as access to this boolean is always done under locking using
-   * _tasks_lock_mutex.
-   */
-  bool _stop = false;
-
-  /*! \brief Vector of thread, the actual thread pool.
-   *
-   *  Emplacing in this vector construct and launch a thread.
-   */
-  std::vector<std::thread> _pool;
-
-  /*! \brief The task queue.
-   *
-   *  Access to this task queue should **always** be done while locking using
-   *  _tasks_lock mutex.
-   */
-  std::queue<std::packaged_task<void()>> _tasks;
-
-  /*! \brief Mutex regulating acces to _tasks.
-   */
-  std::mutex _tasks_lock;
-
-  /*! \brief Condition variable used in workers to wait for an available task.
-   */
-  std::condition_variable _cv_variable;
-
-  /*! \brief Struct containing all hooks the threadpool will call.
-   */
-  std::shared_ptr<Hooks> _hooks;
+  Impl impl;
 };
 
 // ThreadPool implementation
 // public:
 
-inline ThreadPool::ThreadPool()
+template <typename Impl>
+inline ThreadPool<Impl>::ThreadPool()
   : ThreadPool(std::thread::hardware_concurrency(),
                std::thread::hardware_concurrency())
 {
 }
 
-inline ThreadPool::ThreadPool(std::size_t pool_size)
+template <typename Impl>
+inline ThreadPool<Impl>::ThreadPool(std::size_t pool_size)
   : ThreadPool(pool_size, pool_size)
 
 {
 }
 
-inline ThreadPool::ThreadPool(std::size_t pool_size, std::size_t max_pool_size)
-  : _waiting_threads(0)
-  , _working_threads(0)
-  , _pool_size(pool_size)
-  , _max_pool_size(max_pool_size)
-  , _hooks(nullptr)
+template <typename Impl>
+inline ThreadPool<Impl>::ThreadPool(std::size_t pool_size,
+                                    std::size_t max_pool_size)
+  : impl(pool_size, max_pool_size)
 {
-  this->start_pool();
 }
 
-inline ThreadPool::~ThreadPool()
+template <typename Impl>
+inline ThreadPool<Impl>::~ThreadPool()
 {
-  this->stop();
-  this->clean();
+  this->impl.stop();
 }
 
+template <typename Impl>
 template <typename Function, typename... Args>
-auto ThreadPool::run(Function&& f, Args&&... args)
+auto ThreadPool<Impl>::run(Function&& f, Args&&... args)
   -> std::future<RETURN_TYPE(Function(Args...))>
 {
-  using task_return_type = RETURN_TYPE(Function(Args...));
-
-  // Create a packaged task from the callable object to fetch its result
-  // with get_future()
-  auto inner_task = std::packaged_task<task_return_type()>(
-    std::bind(std::forward<Function&&>(f), std::forward<Args&&...>(args)...));
-
-  auto result = inner_task.get_future();
-  {
-    // If the pool can spawn more workers, spawn one for a single task
-    this->check_spawn_single_worker();
-
-    // Lock the queue and emplace move the ownership of the task inside
-    std::lock_guard<std::mutex> lock(this->_tasks_lock);
-
-    if (this->_stop)
-      return result;
-    this->_tasks.emplace(std::move(inner_task));
-  }
-  // Notify one worker that a task is available
-  _cv_variable.notify_one();
-  return result;
+  return this->impl.run(std::forward<Function&&>(f),
+                        std::forward<Args&&>(args)...);
 }
 
-inline void ThreadPool::stop()
+template <typename Impl>
+inline void ThreadPool<Impl>::stop()
 {
-  // Should stop also call clean and stop the threads ?
-  std::lock_guard<std::mutex> lock(this->_tasks_lock);
-  this->_stop = true;
-  this->_cv_variable.notify_all();
+  this->impl.stop();
 }
 
-inline bool ThreadPool::is_stop() const
+template <typename Impl>
+inline bool ThreadPool<Impl>::is_stop() const
 {
-  return this->_stop;
+  return this->impl.is_stop();
 }
 
-inline std::size_t ThreadPool::threads_available() const
+template <typename Impl>
+inline std::size_t ThreadPool<Impl>::threads_available() const
 {
-  return this->_waiting_threads.load();
+  return this->impl.threads_available();
 }
 
-inline std::size_t ThreadPool::threads_working() const
+template <typename Impl>
+inline std::size_t ThreadPool<Impl>::threads_working() const
 {
-  return this->_working_threads.load();
+  return this->impl.threads_working();
 }
 
-inline void ThreadPool::register_hooks(std::shared_ptr<ThreadPool::Hooks> hooks)
+template <typename Impl>
+inline void ThreadPool<Impl>::register_hooks(std::shared_ptr<Hooks> hooks)
 {
-  _hooks = hooks;
+  this->impl.register_hooks(hooks);
 }
-
-// ThreadPool implementation
-// private:
-
-inline void ThreadPool::start_pool()
-{
-  for (std::size_t i = 0; i < this->_pool_size; i++)
-    this->add_worker();
-}
-
-inline void ThreadPool::clean()
-{
-  for (auto& t : _pool)
-    if (t.joinable())
-    {
-      CALL_HOOK_POOL(on_worker_die);
-      t.join();
-    }
-}
-
-inline void ThreadPool::add_worker(std::size_t nb_task)
-{
-  // Instantiate a worker and emplace it in the pool.
-  Worker w(this);
-  _pool.emplace_back(w, nb_task);
-}
-
-inline void ThreadPool::check_spawn_single_worker()
-{
-  // Check if we are allowed to spawn a worker
-  if (this->_max_pool_size > this->_pool_size)
-    // Check if we have space to spawn a worker, and if it is valuable.
-    if (this->_working_threads.load() + this->_waiting_threads.load() <
-        this->_max_pool_size)
-    {
-      CALL_HOOK_POOL(on_worker_add);
-      this->add_worker(1);
-    }
-}
-
-// Worker implementation
-// public:
-
-inline ThreadPool::Worker::Worker(ThreadPool* pool)
-  : _pool(pool)
-{
-}
-
-inline void ThreadPool::Worker::operator()(std::size_t nb_task)
-{
-  for (std::size_t i = 0; i != nb_task || nb_task == 0; i++)
-  {
-    // Thread is waiting
-    _pool->_waiting_threads += 1;
-    std::unique_lock<std::mutex> lock(_pool->_tasks_lock);
-    _pool->_cv_variable.wait(
-      lock, [&] { return _pool->_stop || !_pool->_tasks.empty(); });
-
-    // Pool is stopped, discard task and exit
-    if (_pool->_stop)
-      return;
-
-    CALL_HOOK_WORKER(pre_task_hook);
-
-    _pool->_waiting_threads -= 1;
-    _pool->_working_threads += 1;
-
-    // Fetch task
-    std::packaged_task<void()> task = std::move(_pool->_tasks.front());
-    _pool->_tasks.pop();
-
-    // Release lock and exec task
-    lock.unlock();
-    task();
-
-    CALL_HOOK_WORKER(post_task_hook);
-    // Task done
-    _pool->_working_threads -= 1;
-  }
-}
-
-THREADPOOL_DEFAULT_HOOK(pre_task_hook)
-THREADPOOL_DEFAULT_HOOK(post_task_hook)
-THREADPOOL_DEFAULT_HOOK(on_worker_add)
-THREADPOOL_DEFAULT_HOOK(on_worker_die)
