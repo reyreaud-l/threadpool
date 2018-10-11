@@ -1,36 +1,26 @@
 #include "benchmark/benchmark.h"
+#include "threadpool.hpp"
 #include <set>
 #include <vector>
 
-static void BM_VectorInsert(benchmark::State& state)
+static void BM_ThreadPool_NoBlockingTasks(benchmark::State& state)
 {
   while (state.KeepRunning())
   {
-    std::vector<int> insertion_test;
-    for (int i = 0, i_end = state.range(0); i < i_end; i++)
-    {
-      insertion_test.push_back(i);
-    }
+    ThreadPool<SQMW> pool;
+    std::vector<std::future<int>> results;
+    std::set<std::thread::id> threads_id;
+
+    auto i_end = state.range(0);
+    for (int i = 0; i < i_end; i++)
+      results.push_back(pool.run([i]() { return i * i; }));
+    for (int i = 0; i < i_end; i++)
+      results[i].get();
   }
 }
 
-// Register the function as a benchmark
-BENCHMARK(BM_VectorInsert)->Range(8, 8 << 10);
-
-//~~~~~~~~~~~~~~~~
-
-// Define another benchmark
-static void BM_SetInsert(benchmark::State& state)
-{
-  while (state.KeepRunning())
-  {
-    std::set<int> insertion_test;
-    for (int i = 0, i_end = state.range(0); i < i_end; i++)
-    {
-      insertion_test.insert(i);
-    }
-  }
-}
-BENCHMARK(BM_SetInsert)->Range(8, 8 << 10);
+BENCHMARK(BM_ThreadPool_NoBlockingTasks)
+  ->Range(8, 8 << 14)
+  ->Unit(benchmark::kMillisecond);
 
 BENCHMARK_MAIN();

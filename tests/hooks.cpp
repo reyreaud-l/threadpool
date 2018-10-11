@@ -1,6 +1,6 @@
 #include "tests.hpp"
 
-struct TestHooks : public ThreadPool::Hooks
+struct TestHooks : public Hooks
 {
   void pre_task_hook() final
   {
@@ -31,26 +31,26 @@ struct TestHooks : public ThreadPool::Hooks
   int check_worker_die = 0;
 };
 
-class Hooks : public ::testing::Test
+class THooks : public ::testing::Test
 {
 protected:
   virtual void SetUp() final
   {
-    pool = std::unique_ptr<ThreadPool>(new ThreadPool(1));
+    pool = std::unique_ptr<ThreadPool<SQMW>>(new ThreadPool<SQMW>(2));
     hooks = std::shared_ptr<TestHooks>(new TestHooks());
   }
-  std::unique_ptr<ThreadPool> pool;
+  std::unique_ptr<ThreadPool<SQMW>> pool;
   std::shared_ptr<TestHooks> hooks;
 };
 
-TEST_F(Hooks, RegisterHooksNoCall)
+TEST_F(THooks, RegisterTHooksNoCall)
 {
   pool->register_hooks(hooks);
   ASSERT_FALSE(hooks->check_pre_task);
   ASSERT_FALSE(hooks->check_post_task);
 }
 
-TEST_F(Hooks, CheckTaskHooksCalled)
+TEST_F(THooks, CheckTaskTHooksCalled)
 {
   pool->register_hooks(hooks);
   ASSERT_FALSE(hooks->check_pre_task);
@@ -70,9 +70,9 @@ TEST_F(Hooks, CheckTaskHooksCalled)
 // This tests abuse from sleep to simulate heaavy coreload.
 // In practice if a task is really quick to run and you launch them in a quick
 // succession, a new thread might not spawn.
-TEST_F(Hooks, TestWorkerHooksCalled)
+TEST_F(THooks, TestWorkerTHooksCalled)
 {
-  pool = std::unique_ptr<ThreadPool>(new ThreadPool(1, 3));
+  pool = std::unique_ptr<ThreadPool<SQMW>>(new ThreadPool<SQMW>(1, 3));
   pool->register_hooks(hooks);
 
   std::size_t nb_tests = 3;
