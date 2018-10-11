@@ -5,10 +5,10 @@ class MultipleThread : public ::testing::Test
 protected:
   virtual void SetUp() final
   {
-    pool = std::unique_ptr<ThreadPool<SQMW>>(new ThreadPool<SQMW>(2));
+    pool = std::unique_ptr<ThreadPool::ThreadPool<ThreadPool::SQMW>>(
+      new ThreadPool::ThreadPool<ThreadPool::SQMW>(2));
   }
-
-  std::unique_ptr<ThreadPool<SQMW>> pool;
+  std::unique_ptr<ThreadPool::ThreadPool<ThreadPool::SQMW>> pool;
 };
 
 TEST_F(MultipleThread, StartStop)

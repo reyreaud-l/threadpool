@@ -27,7 +27,9 @@
  *  When created, the pool will start the workers(threads) immediatly. The
  *  threads will only terminate when the pool is destroyed.
  */
-template <typename Impl>
+namespace ThreadPool
+{
+template <typename Impl = SQMW>
 class ThreadPool
 {
 public:
@@ -113,6 +115,9 @@ public:
   void register_hooks(std::shared_ptr<Hooks> hooks);
 
 private:
+  /*!
+   *
+   */
   Impl impl;
 };
 
@@ -184,3 +189,4 @@ inline void ThreadPool<Impl>::register_hooks(std::shared_ptr<Hooks> hooks)
 {
   this->impl.register_hooks(hooks);
 }
+} // namespace ThreadPool

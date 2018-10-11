@@ -7,7 +7,7 @@ static void BM_ThreadPool_NoBlockingTasks(benchmark::State& state)
 {
   while (state.KeepRunning())
   {
-    ThreadPool<SQMW> pool;
+    ThreadPool::ThreadPool<ThreadPool::SQMW> pool;
     std::vector<std::future<int>> results;
     std::set<std::thread::id> threads_id;
 

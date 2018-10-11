@@ -33,6 +33,8 @@
       _hooks->HOOK();                                                          \
   } while (0)
 
+namespace ThreadPool
+{
 /*! \brief ThreadPool is a class representing a group of threads.
  *
  *  When created, the pool will start the workers(threads) immediatly. The
@@ -394,3 +396,4 @@ inline void SQMW::Worker::operator()(std::size_t nb_task)
     _pool->_working_threads -= 1;
   }
 }
+} // namespace ThreadPool

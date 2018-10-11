@@ -6,6 +6,8 @@
     return;                                                                    \
   }
 
+namespace ThreadPool
+{
 /*! \brief Inner class containing hooks the ThreadPool will call.
  *
  *  This class is used as an interface to allow user defined hooks to be
@@ -63,3 +65,5 @@ THREADPOOL_DEFAULT_HOOK(pre_task_hook)
 THREADPOOL_DEFAULT_HOOK(post_task_hook)
 THREADPOOL_DEFAULT_HOOK(on_worker_add)
 THREADPOOL_DEFAULT_HOOK(on_worker_die)
+
+} // namespace ThreadPool
