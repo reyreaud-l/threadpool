@@ -48,6 +48,12 @@ class ThreadPool
 {
 public:
   /*! \brief Constructs a ThreadPool.
+   *  The pool size will be detucted from number of threads available on the
+   *  machine/
+   */
+  ThreadPool();
+
+  /*! \brief Constructs a ThreadPool.
    *  \param pool_size Number of threads to start.
    */
   ThreadPool(std::size_t pool_size);
@@ -283,6 +289,12 @@ private:
 
 // ThreadPool implementation
 // public:
+
+inline ThreadPool::ThreadPool()
+  : ThreadPool(std::thread::hardware_concurrency(),
+               std::thread::hardware_concurrency())
+{
+}
 
 inline ThreadPool::ThreadPool(std::size_t pool_size)
   : ThreadPool(pool_size, pool_size)

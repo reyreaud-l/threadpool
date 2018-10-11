@@ -8,6 +8,10 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 
 Unreleased
 ----------
+Added
+~~~~~~~
+- Added overloading constructor which deducts number of available thread from
+  the hardware.
 Changed
 ~~~~~~~
 - Remove hook copy overload (it was wrong)
