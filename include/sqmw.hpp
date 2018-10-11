@@ -35,10 +35,13 @@
 
 namespace ThreadPool
 {
-/*! \brief ThreadPool is a class representing a group of threads.
+/*! \brief SQWM is a class implementating the ThreadPool interface.
  *
  *  When created, the pool will start the workers(threads) immediatly. The
  *  threads will only terminate when the pool is destroyed.
+ *
+ *  This class implements a single queue, multiple worker strategy to dispatch
+ *  work.
  */
 class SQMW
 {

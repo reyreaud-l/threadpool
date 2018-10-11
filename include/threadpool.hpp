@@ -60,9 +60,8 @@ public:
    *  \returns Returns a future containing the result of the task.
    *
    *  When a task is ran in the ThreadPool, the callable object will be packaged
-   *  in a packaged_task and put in the inner task_queue. A waiting worker will
-   *  pick the task and execute it. If no workers are available, the task will
-   *  remain in the queue until a worker picks it up.
+   *  in a packaged_task and then it will be processed. The process will depend
+   *  on the selected implementation.
    */
   template <typename Function, typename... Args>
   auto run(Function&& f, Args&&... args)
@@ -76,7 +75,7 @@ public:
   void stop();
 
   /*! \brief Check the state of the threadpool
-   *  \returns True if the bool is stopped, false otherwise.
+   *  \returns True if the pool is stopped, false otherwise.
    */
   bool is_stop() const;
 
@@ -115,8 +114,12 @@ public:
   void register_hooks(std::shared_ptr<Hooks> hooks);
 
 private:
-  /*!
+  /*! \brief This member is the actual threadpool implementation.
    *
+   *  All calls are forwared to impl. This composition is required as virtual
+   *  and templates don't work together. Therefore to have an "interface" kind
+   *  of stuff with this class, inheritance was ruled out. This policy based
+   *  design is usefull to have a class act as an interface.
    */
   Impl impl;
 };

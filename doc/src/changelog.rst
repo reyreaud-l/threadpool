@@ -12,6 +12,8 @@ Added
 ~~~~~~~
 - Added overloading constructor which deducts number of available thread from
   the hardware.
+- All code now lies in the :code:`ThreadPool` namespace.
+
 Changed
 ~~~~~~~
 - Remove hook copy overload (it was wrong)

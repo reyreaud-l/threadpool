@@ -9,6 +9,7 @@ into your source tree, or you can install it. To install run the following
 commands:
 
 .. code-block:: bash
+  :linenos:
 
   $ git clone git@github.com:reyreaud-l/threadpool.git
   $ cd threadpool
@@ -35,6 +36,7 @@ task is ran. It is possible to use this syntax if you don't care about the
 return value or don't want to wait for a task to end:
 
 .. code-block:: c++
+  :linenos:
 
   ...
   mypool.run([]() { std::cout << "Hello there!" << std::endl; });
