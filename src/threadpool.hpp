@@ -1,27 +1,11 @@
 #pragma once
 
-#include <condition_variable>
-#include <functional>
 #include <future>
-#include <iostream>
 #include <memory>
-#include <mutex>
-#include <queue>
-#include <thread>
 #include <type_traits>
-#include <vector>
 
 #include "hooks.hpp"
 #include "single_queue.hpp"
-
-#if __cplusplus >= 201500
-// FIXME: should be next line but fails
-// #define RETURN_TYPE(X) std::invoke_result_t<X>
-// so instead use deprecated version in both cases.
-#define RETURN_TYPE(X) typename std::result_of<X>::type
-#else
-#define RETURN_TYPE(X) typename std::result_of<X>::type
-#endif
 
 /*! \brief ThreadPool is a class representing a group of threads.
  *
@@ -66,7 +50,7 @@ public:
    */
   template <typename Function, typename... Args>
   auto run(Function&& f, Args&&... args)
-    -> std::future<RETURN_TYPE(Function(Args...))>;
+    -> std::future<typename std::result_of<Function(Args...)>::type>;
 
   /*! \brief Stop the ThreadPool.
    *
@@ -158,7 +142,7 @@ inline ThreadPool<Impl>::~ThreadPool()
 template <typename Impl>
 template <typename Function, typename... Args>
 auto ThreadPool<Impl>::run(Function&& f, Args&&... args)
-  -> std::future<RETURN_TYPE(Function(Args...))>
+  -> std::future<typename std::result_of<Function(Args...)>::type>
 {
   return this->impl->run(std::forward<Function&&>(f),
                          std::forward<Args&&>(args)...);
