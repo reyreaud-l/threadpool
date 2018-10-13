@@ -3,7 +3,6 @@
 #include <condition_variable>
 #include <functional>
 #include <future>
-#include <iostream>
 #include <mutex>
 #include <queue>
 #include <thread>
@@ -11,29 +10,7 @@
 #include <vector>
 
 #include "hooks.hpp"
-
-#if __cplusplus >= 201500
-// FIXME: should be next line but fails
-// #define RETURN_TYPE(X) std::invoke_result_t<X>
-// so instead use deprecated version in both cases.
-#define RETURN_TYPE(X) typename std::result_of<X>::type
-#else
-#define RETURN_TYPE(X) typename std::result_of<X>::type
-#endif
-
-#define CALL_HOOK_WORKER(HOOK)                                                 \
-  do                                                                           \
-  {                                                                            \
-    if (_pool->_hooks)                                                         \
-      _pool->_hooks->HOOK();                                                   \
-  } while (0)
-
-#define CALL_HOOK_POOL(HOOK)                                                   \
-  do                                                                           \
-  {                                                                            \
-    if (_hooks)                                                                \
-      _hooks->HOOK();                                                          \
-  } while (0)
+#include "threadpool_base.hpp"
 
 namespace ThreadPool
 {
@@ -45,7 +22,7 @@ namespace ThreadPool
  *  This class implements a single queue, multiple worker strategy to dispatch
  *  work.
  */
-class SingleQueue
+class SingleQueue : public ThreadPoolBase
 {
 public:
   /*! \brief Constructs a SingleQueue.
@@ -81,7 +58,7 @@ public:
    */
   template <typename Function, typename... Args>
   auto run(Function&& f, Args&&... args)
-    -> std::future<RETURN_TYPE(Function(Args...))>;
+    -> std::future<typename std::result_of<Function(Args...)>::type>;
 
   /*! \brief Stop the SingleQueue.
    *
@@ -89,45 +66,6 @@ public:
    * will discard new tasks, but the threads will not exit.
    */
   void stop();
-
-  /*! \brief Check the state of the threadpool
-   *  \returns True if the bool is stopped, false otherwise.
-   */
-  bool is_stop() const;
-
-  /*! \brief Check on the number of threads not currently working.
-   *  \returns The number of threads currently waiting for a task.
-   *
-   * The number might be imprecise, as between the time the value is read and
-   * returned, a thread might become unavailable.
-   */
-  std::size_t threads_available() const;
-
-  /*! \brief Check on the number of threads currently working.
-   *  \returns The number of threads currently working.
-   *
-   * The number might be imprecise, as between the time the value is read and
-   * returned, a thread might finish a task and become available.
-   */
-  std::size_t threads_working() const;
-
-  /* I don't like this implementation with a shared pointer. I don't know why
-     but it makes me feel uncomfortable.
-
-     Our options are:
-     shared_ptr: easy solution. But do we really need shared ownership ? I don't
-     think it's necessary for such a simple interface.
-     unique_ptr: user probably wants to keep ownership of the hooks if it uses
-     them to store data. It would require a way to give back ownership to user
-     (ie give/take ala rust).
-     weak_ptr: requires the user to make a shared_ptr. Would clear the weak_ptr
-     when the shared_ptr is destroyed (which does not happen with raw pointer)
-  */
-
-  /*! \brief Register a SingleQueue::Hooks class.
-   *  \param hooks The class to be registered
-   */
-  void register_hooks(std::shared_ptr<Hooks> hooks);
 
 private:
   /*! \brief Starts the pool when the pool is constructed.
@@ -184,31 +122,6 @@ private:
    */
   void check_spawn_single_worker();
 
-  /*! \brief Number of waiting threads in the pool.
-   */
-  std::atomic<std::size_t> _waiting_threads;
-
-  /*! \brief Number of threads executing a task in the pool.
-   */
-  std::atomic<std::size_t> _working_threads;
-
-  /*! \brief Size of the pool.
-   */
-  const std::size_t _pool_size;
-
-  /*! \brief Max possible size of the pool.
-   *
-   *  This parameter is used to add additional threads if
-   */
-  const std::size_t _max_pool_size;
-
-  /*! \brief Boolean representing if the pool is stopped.
-   *
-   * Not an atomic as access to this boolean is always done under locking using
-   * _tasks_lock_mutex.
-   */
-  bool _stop = false;
-
   /*! \brief Vector of thread, the actual thread pool.
    *
    *  Emplacing in this vector construct and launch a thread.
@@ -229,17 +142,13 @@ private:
   /*! \brief Condition variable used in workers to wait for an available task.
    */
   std::condition_variable _cv_variable;
-
-  /*! \brief Struct containing all hooks the threadpool will call.
-   */
-  std::shared_ptr<Hooks> _hooks;
 };
 
 template <typename Function, typename... Args>
 auto SingleQueue::run(Function&& f, Args&&... args)
-  -> std::future<RETURN_TYPE(Function(Args...))>
+  -> std::future<typename std::result_of<Function(Args...)>::type>
 {
-  using task_return_type = RETURN_TYPE(Function(Args...));
+  using task_return_type = typename std::result_of<Function(Args...)>::type;
 
   // Create a packaged task from the callable object to fetch its result
   // with get_future()

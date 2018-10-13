@@ -1,5 +1,6 @@
 add_library(threadpool SHARED
   single_queue.cpp
+  threadpool_base.cpp
 )
 target_include_directories(threadpool PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 

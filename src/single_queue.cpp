@@ -18,11 +18,7 @@ SingleQueue::SingleQueue(std::size_t pool_size)
 }
 
 SingleQueue::SingleQueue(std::size_t pool_size, std::size_t max_pool_size)
-  : _waiting_threads(0)
-  , _working_threads(0)
-  , _pool_size(pool_size)
-  , _max_pool_size(max_pool_size)
-  , _hooks(nullptr)
+  : ThreadPoolBase(pool_size, max_pool_size)
 {
   this->start_pool();
 }
@@ -39,26 +35,6 @@ void SingleQueue::stop()
   std::lock_guard<std::mutex> lock(this->_tasks_lock);
   this->_stop = true;
   this->_cv_variable.notify_all();
-}
-
-bool SingleQueue::is_stop() const
-{
-  return this->_stop;
-}
-
-std::size_t SingleQueue::threads_available() const
-{
-  return this->_waiting_threads.load();
-}
-
-std::size_t SingleQueue::threads_working() const
-{
-  return this->_working_threads.load();
-}
-
-void SingleQueue::register_hooks(std::shared_ptr<Hooks> hooks)
-{
-  _hooks = hooks;
 }
 
 // SingleQueue implementation
