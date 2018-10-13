@@ -5,10 +5,10 @@ class VariableThread : public ::testing::Test
 protected:
   virtual void SetUp() final
   {
-    pool = std::unique_ptr<ThreadPool::ThreadPool<ThreadPool::SQMW>>(
-      new ThreadPool::ThreadPool<ThreadPool::SQMW>(2, 3));
+    pool = std::unique_ptr<ThreadPool::ThreadPool<>>(
+      new ThreadPool::ThreadPool<>(2, 3));
   }
-  std::unique_ptr<ThreadPool::ThreadPool<ThreadPool::SQMW>> pool;
+  std::unique_ptr<ThreadPool::ThreadPool<>> pool;
 };
 
 // This tests abuse from sleep to simulate heavy coreload.

@@ -45,47 +45,47 @@ namespace ThreadPool
  *  This class implements a single queue, multiple worker strategy to dispatch
  *  work.
  */
-class SQMW
+class SingleQueue
 {
 public:
-  /*! \brief Constructs a SQMW.
+  /*! \brief Constructs a SingleQueue.
    *  The pool size will be detucted from number of threads available on the
    *  machine/
    */
-  SQMW();
+  SingleQueue();
 
-  /*! \brief Constructs a SQMW.
+  /*! \brief Constructs a SingleQueue.
    *  \param pool_size Number of threads to start.
    */
-  SQMW(std::size_t pool_size);
+  SingleQueue(std::size_t pool_size);
 
-  /*! \brief Constructs a SQMW.
+  /*! \brief Constructs a SingleQueue.
    *  \param pool_size Number of threads to start.
    *  \param max_pool_size Maximum number of threads allowed, this will be used
    *  by the pool to extend the number of threads temporarily when all threads
    *  are used.
    */
-  SQMW(std::size_t pool_size, std::size_t max_pool_size);
+  SingleQueue(std::size_t pool_size, std::size_t max_pool_size);
 
   /*! \brief Stops the pool and clean all workers.
    */
-  ~SQMW();
+  ~SingleQueue();
 
-  /*! \brief Run a task in the SQMW.
+  /*! \brief Run a task in the SingleQueue.
    *  \returns Returns a future containing the result of the task.
    *
-   *  When a task is ran in the SQMW, the callable object will be packaged
-   *  in a packaged_task and put in the inner task_queue. A waiting worker will
-   *  pick the task and execute it. If no workers are available, the task will
-   *  remain in the queue until a worker picks it up.
+   *  When a task is ran in the SingleQueue, the callable object will be
+   * packaged in a packaged_task and put in the inner task_queue. A waiting
+   * worker will pick the task and execute it. If no workers are available, the
+   * task will remain in the queue until a worker picks it up.
    */
   template <typename Function, typename... Args>
   auto run(Function&& f, Args&&... args)
     -> std::future<RETURN_TYPE(Function(Args...))>;
 
-  /*! \brief Stop the SQMW.
+  /*! \brief Stop the SingleQueue.
    *
-   * A stopped SQMW will discard any task dispatched to it. All workers
+   * A stopped SingleQueue will discard any task dispatched to it. All workers
    * will discard new tasks, but the threads will not exit.
    */
   void stop();
@@ -124,7 +124,7 @@ public:
      when the shared_ptr is destroyed (which does not happen with raw pointer)
   */
 
-  /*! \brief Register a SQMW::Hooks class.
+  /*! \brief Register a SingleQueue::Hooks class.
    *  \param hooks The class to be registered
    */
   void register_hooks(std::shared_ptr<Hooks> hooks);
@@ -142,29 +142,29 @@ private:
    */
   void clean();
 
-  /*! \brief Inner worker class. Capture the SQMW when built.
+  /*! \brief Inner worker class. Capture the SingleQueue when built.
    *
    *  The only job of this class is to run tasks. It will use the captured
-   *  SQMW to interact with it.
+   *  SingleQueue to interact with it.
    */
   struct Worker
   {
   public:
     /*! \brief Construct a worker.
-     *  \param pool The SQMW the worker works for.
+     *  \param pool The SingleQueue the worker works for.
      */
-    Worker(SQMW* pool);
+    Worker(SingleQueue* pool);
 
     /*! \brief Poll task from the queue.
      *  \param nb_task Number of tasks to run and then exit. If 0 then run until
-     *  the SQMW stops.
+     *  the SingleQueue stops.
      */
     void operator()(std::size_t nb_task);
 
   private:
-    /*! \brief Captured SQMW that the worker works for.
+    /*! \brief Captured SingleQueue that the worker works for.
      */
-    SQMW* _pool;
+    SingleQueue* _pool;
   };
 
   /*! \brief Start a worker for a nb_task.
@@ -236,7 +236,7 @@ private:
 };
 
 template <typename Function, typename... Args>
-auto SQMW::run(Function&& f, Args&&... args)
+auto SingleQueue::run(Function&& f, Args&&... args)
   -> std::future<RETURN_TYPE(Function(Args...))>
 {
   using task_return_type = RETURN_TYPE(Function(Args...));

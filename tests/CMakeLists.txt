@@ -10,7 +10,7 @@ add_executable(${TESTS_EXEC}
 )
 
 target_link_libraries(${TESTS_EXEC} PRIVATE
-  ${LIB}
+  threadpool
   gtest_main
   Threads::Threads
 )

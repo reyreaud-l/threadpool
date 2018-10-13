@@ -1,23 +1,23 @@
-#include "sqmw.hpp"
+#include "single_queue.hpp"
 
 namespace ThreadPool
 {
-// SQMW implementation
+// SingleQueue implementation
 // public:
 
-SQMW::SQMW()
-  : SQMW(std::thread::hardware_concurrency(),
-         std::thread::hardware_concurrency())
+SingleQueue::SingleQueue()
+  : SingleQueue(std::thread::hardware_concurrency(),
+                std::thread::hardware_concurrency())
 {
 }
 
-SQMW::SQMW(std::size_t pool_size)
-  : SQMW(pool_size, pool_size)
+SingleQueue::SingleQueue(std::size_t pool_size)
+  : SingleQueue(pool_size, pool_size)
 
 {
 }
 
-SQMW::SQMW(std::size_t pool_size, std::size_t max_pool_size)
+SingleQueue::SingleQueue(std::size_t pool_size, std::size_t max_pool_size)
   : _waiting_threads(0)
   , _working_threads(0)
   , _pool_size(pool_size)
@@ -27,13 +27,13 @@ SQMW::SQMW(std::size_t pool_size, std::size_t max_pool_size)
   this->start_pool();
 }
 
-SQMW::~SQMW()
+SingleQueue::~SingleQueue()
 {
   this->stop();
   this->clean();
 }
 
-void SQMW::stop()
+void SingleQueue::stop()
 {
   // Should stop also call clean and stop the threads ?
   std::lock_guard<std::mutex> lock(this->_tasks_lock);
@@ -41,36 +41,36 @@ void SQMW::stop()
   this->_cv_variable.notify_all();
 }
 
-bool SQMW::is_stop() const
+bool SingleQueue::is_stop() const
 {
   return this->_stop;
 }
 
-std::size_t SQMW::threads_available() const
+std::size_t SingleQueue::threads_available() const
 {
   return this->_waiting_threads.load();
 }
 
-std::size_t SQMW::threads_working() const
+std::size_t SingleQueue::threads_working() const
 {
   return this->_working_threads.load();
 }
 
-void SQMW::register_hooks(std::shared_ptr<Hooks> hooks)
+void SingleQueue::register_hooks(std::shared_ptr<Hooks> hooks)
 {
   _hooks = hooks;
 }
 
-// SQMW implementation
+// SingleQueue implementation
 // private:
 
-void SQMW::start_pool()
+void SingleQueue::start_pool()
 {
   for (std::size_t i = 0; i < this->_pool_size; i++)
     this->add_worker();
 }
 
-void SQMW::clean()
+void SingleQueue::clean()
 {
   for (auto& t : _pool)
     if (t.joinable())
@@ -80,14 +80,14 @@ void SQMW::clean()
     }
 }
 
-void SQMW::add_worker(std::size_t nb_task)
+void SingleQueue::add_worker(std::size_t nb_task)
 {
   // Instantiate a worker and emplace it in the pool.
   Worker w(this);
   _pool.emplace_back(w, nb_task);
 }
 
-void SQMW::check_spawn_single_worker()
+void SingleQueue::check_spawn_single_worker()
 {
   // Check if we are allowed to spawn a worker
   if (this->_max_pool_size > this->_pool_size)
@@ -103,12 +103,12 @@ void SQMW::check_spawn_single_worker()
 // Worker implementation
 // public:
 
-SQMW::Worker::Worker(SQMW* pool)
+SingleQueue::Worker::Worker(SingleQueue* pool)
   : _pool(pool)
 {
 }
 
-void SQMW::Worker::operator()(std::size_t nb_task)
+void SingleQueue::Worker::operator()(std::size_t nb_task)
 {
   for (std::size_t i = 0; i != nb_task || nb_task == 0; i++)
   {

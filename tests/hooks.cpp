@@ -36,11 +36,11 @@ class THooks : public ::testing::Test
 protected:
   virtual void SetUp() final
   {
-    pool = std::unique_ptr<ThreadPool::ThreadPool<ThreadPool::SQMW>>(
-      new ThreadPool::ThreadPool<ThreadPool::SQMW>(2));
+    pool = std::unique_ptr<ThreadPool::ThreadPool<>>(
+      new ThreadPool::ThreadPool<>(2));
     hooks = std::shared_ptr<TestHooks>(new TestHooks());
   }
-  std::unique_ptr<ThreadPool::ThreadPool<ThreadPool::SQMW>> pool;
+  std::unique_ptr<ThreadPool::ThreadPool<>> pool;
   std::shared_ptr<TestHooks> hooks;
 };
 
@@ -73,8 +73,8 @@ TEST_F(THooks, CheckTaskTHooksCalled)
 // succession, a new thread might not spawn.
 TEST_F(THooks, TestWorkerTHooksCalled)
 {
-  pool = std::unique_ptr<ThreadPool::ThreadPool<ThreadPool::SQMW>>(
-    new ThreadPool::ThreadPool<ThreadPool::SQMW>(1, 3));
+  pool = std::unique_ptr<ThreadPool::ThreadPool<>>(
+    new ThreadPool::ThreadPool<>(1, 3));
   pool->register_hooks(hooks);
 
   std::size_t nb_tests = 3;

@@ -6,7 +6,7 @@ add_executable(${BENCH_EXEC}
 )
 
 target_link_libraries(${BENCH_EXEC} PRIVATE
-  ${LIB}
+  threadpool
   Threads::Threads
   benchmark
 )

@@ -12,7 +12,7 @@
 #include <vector>
 
 #include "hooks.hpp"
-#include "sqmw.hpp"
+#include "single_queue.hpp"
 
 #if __cplusplus >= 201500
 // FIXME: should be next line but fails
@@ -30,7 +30,7 @@
  */
 namespace ThreadPool
 {
-template <typename Impl = SQMW>
+template <typename Impl = SingleQueue>
 class ThreadPool
 {
 public:

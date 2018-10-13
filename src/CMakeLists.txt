@@ -1,14 +1,13 @@
-set(LIB threadpool)
-add_library(${LIB} SHARED
-  sqmw.cpp
+add_library(threadpool SHARED
+  single_queue.cpp
 )
-target_include_directories(${LIB} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(threadpool PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Install
 install(FILES threadpool.hpp DESTINATION include/threadpool)
-install(FILES sqmw.hpp DESTINATION include/threadpool)
+install(FILES single_queue.hpp DESTINATION include/threadpool)
 install(FILES hooks.hpp DESTINATION include/threadpool)
-install(TARGETS ${LIB} DESTINATION lib)
+install(TARGETS threadpool DESTINATION lib)
 
 # Uninstall target
 if(NOT TARGET uninstall)

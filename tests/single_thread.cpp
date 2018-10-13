@@ -5,10 +5,10 @@ class SingleThread : public ::testing::Test
 protected:
   virtual void SetUp() final
   {
-    pool = std::unique_ptr<ThreadPool::ThreadPool<ThreadPool::SQMW>>(
-      new ThreadPool::ThreadPool<ThreadPool::SQMW>(1));
+    pool = std::unique_ptr<ThreadPool::ThreadPool<>>(
+      new ThreadPool::ThreadPool<>(1));
   }
-  std::unique_ptr<ThreadPool::ThreadPool<ThreadPool::SQMW>> pool;
+  std::unique_ptr<ThreadPool::ThreadPool<>> pool;
 };
 
 TEST_F(SingleThread, StartStop)
