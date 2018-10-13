@@ -4,6 +4,7 @@
 #include <functional>
 #include <future>
 #include <iostream>
+#include <memory>
 #include <mutex>
 #include <queue>
 #include <thread>
@@ -121,7 +122,7 @@ private:
    *  of stuff with this class, inheritance was ruled out. This policy based
    *  design is usefull to have a class act as an interface.
    */
-  Impl impl;
+  std::unique_ptr<Impl> impl;
 };
 
 // ThreadPool implementation
@@ -144,14 +145,14 @@ inline ThreadPool<Impl>::ThreadPool(std::size_t pool_size)
 template <typename Impl>
 inline ThreadPool<Impl>::ThreadPool(std::size_t pool_size,
                                     std::size_t max_pool_size)
-  : impl(pool_size, max_pool_size)
 {
+  impl = std::unique_ptr<Impl>(new Impl(pool_size, max_pool_size));
 }
 
 template <typename Impl>
 inline ThreadPool<Impl>::~ThreadPool()
 {
-  this->impl.stop();
+  this->impl->stop();
 }
 
 template <typename Impl>
@@ -159,37 +160,37 @@ template <typename Function, typename... Args>
 auto ThreadPool<Impl>::run(Function&& f, Args&&... args)
   -> std::future<RETURN_TYPE(Function(Args...))>
 {
-  return this->impl.run(std::forward<Function&&>(f),
-                        std::forward<Args&&>(args)...);
+  return this->impl->run(std::forward<Function&&>(f),
+                         std::forward<Args&&>(args)...);
 }
 
 template <typename Impl>
 inline void ThreadPool<Impl>::stop()
 {
-  this->impl.stop();
+  this->impl->stop();
 }
 
 template <typename Impl>
 inline bool ThreadPool<Impl>::is_stop() const
 {
-  return this->impl.is_stop();
+  return this->impl->is_stop();
 }
 
 template <typename Impl>
 inline std::size_t ThreadPool<Impl>::threads_available() const
 {
-  return this->impl.threads_available();
+  return this->impl->threads_available();
 }
 
 template <typename Impl>
 inline std::size_t ThreadPool<Impl>::threads_working() const
 {
-  return this->impl.threads_working();
+  return this->impl->threads_working();
 }
 
 template <typename Impl>
 inline void ThreadPool<Impl>::register_hooks(std::shared_ptr<Hooks> hooks)
 {
-  this->impl.register_hooks(hooks);
+  this->impl->register_hooks(hooks);
 }
 } // namespace ThreadPool
