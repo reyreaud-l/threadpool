@@ -22,7 +22,7 @@ set(CMAKE_CXX_FLAGS "-Wall -Wextra -pedantic")
 set(CMAKE_CXX_FLAGS_DEBUG "-g3 -O0")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
-add_subdirectory(include)
+add_subdirectory(src)
 
 # Tests and bench
 if (BUILD_TESTS)

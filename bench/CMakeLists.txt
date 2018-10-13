@@ -6,12 +6,10 @@ add_executable(${BENCH_EXEC}
 )
 
 target_link_libraries(${BENCH_EXEC} PRIVATE
+  ${LIB}
   Threads::Threads
   benchmark
 )
-target_include_directories(${BENCH_EXEC} PRIVATE
-  ${CMAKE_SOURCE_DIR}/include
-  ${CMAKE_SOURCE_DIR}/bench
-)
+target_include_directories(${BENCH_EXEC} PRIVATE ${CMAKE_SOURCE_DIR}/bench)
 
 add_custom_target(bench ${BENCH_EXEC} DEPENDS ${BENCH_EXEC} COMMENT "Running benchs...")
