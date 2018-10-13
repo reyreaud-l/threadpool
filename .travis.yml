@@ -8,7 +8,7 @@ addons:
     packages:
       - cmake
 
-script:
+script: &test_script
   - if [ $TRAVIS_OS_NAME = "osx" ]; then brew update >/dev/null; fi
   - if [ $TRAVIS_OS_NAME = "osx" ] && [ $BREW_SKIP = "false" ]; then brew install $BREW_INSTALL; fi
   - if [ $TRAVIS_OS_NAME = "osx" ]; then brew upgrade cmake; fi
@@ -18,11 +18,12 @@ script:
   - make check
   - make examples
 
-matrix:
+jobs:
   fast_finish: true
   include:
     # Begin gcc
     - os: linux
+      stage: "Test Linux"
       name: "Linux GCC 4.9"
       addons:
         apt:
@@ -33,8 +34,10 @@ matrix:
       env:
         - CC=gcc-4.9
         - CXX=g++-4.9
+      script: *test_script
 
     - os: linux
+      stage: "Test Linux"
       name: "Linux GCC 5"
       addons:
         apt:
@@ -45,8 +48,10 @@ matrix:
       env:
         - CC=gcc-5
         - CXX=g++-5
+      script: *test_script
 
     - os: linux
+      stage: "Test Linux"
       name: "Linux GCC 6"
       addons:
         apt:
@@ -57,8 +62,10 @@ matrix:
       env:
         - CC=gcc-6
         - CXX=g++-6
+      script: *test_script
 
     - os: linux
+      stage: "Test Linux"
       name: "Linux GCC 7"
       addons:
         apt:
@@ -69,10 +76,12 @@ matrix:
       env:
         - CC=gcc-7
         - CXX=g++-7
+      script: *test_script
     # End gcc
 
     # Begin Clang
     - os: linux
+      stage: "Test Linux"
       name: "Linux Clang 3.6"
       addons:
         apt:
@@ -84,8 +93,10 @@ matrix:
       env:
         - CC=clang-3.6
         - CXX=clang++-3.6
+      script: *test_script
 
     - os: linux
+      stage: "Test Linux"
       name: "Linux Clang 3.7"
       addons:
         apt:
@@ -97,8 +108,10 @@ matrix:
       env:
         - CC=clang-3.7
         - CXX=clang++-3.7
+      script: *test_script
 
     - os: linux
+      stage: "Test Linux"
       name: "Linux Clang 3.8"
       addons:
         apt:
@@ -110,8 +123,10 @@ matrix:
       env:
         - CC=clang-3.8
         - CXX=clang++-3.8
+      script: *test_script
 
     - os: linux
+      stage: "Test Linux"
       name: "Linux Clang 3.9"
       addons:
         apt:
@@ -122,8 +137,10 @@ matrix:
       env:
         - CC=clang-3.9
         - CXX=clang++-3.9
+      script: *test_script
 
     - os: linux
+      stage: "Test Linux"
       name: "Linux Clang 4.0"
       addons:
         apt:
@@ -134,8 +151,10 @@ matrix:
       env:
         - CC=clang-4.0
         - CXX=clang++-4.0
+      script: *test_script
 
     - os: linux
+      stage: "Test Linux"
       name: "Linux Clang 5.0"
       addons:
         apt:
@@ -146,10 +165,12 @@ matrix:
       env:
         - CC=clang-5.0
         - CXX=clang++-5.0
+      script: *test_script
     # End Clang
 
     # Begin gcc OSX
     - os: osx
+      stage: "Test OSX"
       name: "OSX GCC 5"
       osx_image: xcode8
       env:
@@ -157,8 +178,10 @@ matrix:
         - BREW_INSTALL=gcc@5
         - CC=gcc-5
         - CXX=g++-5
+      script: *test_script
 
     - os: osx
+      stage: "Test OSX"
       name: "OSX GCC 6"
       osx_image: xcode8
       env:
@@ -166,8 +189,10 @@ matrix:
         - BREW_INSTALL=gcc@6
         - CC=gcc-6
         - CXX=g++-6
+      script: *test_script
 
     - os: osx
+      stage: "Test OSX"
       name: "OSX GCC 7"
       osx_image: xcode8
       env:
@@ -175,21 +200,26 @@ matrix:
         - BREW_INSTALL=gcc@7
         - CC=gcc-7
         - CXX=g++-7
+      script: *test_script
     # End gcc OSX
 
     # Begin clang OSX
     - os: osx
+      stage: "Test OSX"
       name: "OSX Clang xcode8.3"
       osx_image: xcode8.3
       compiler: clang
       env:
         - BREW_SKIP=true
+      script: *test_script
 
     - os: osx
+      stage: "Test OSX"
       name: "OSX Clang xcode9.1"
       osx_image: xcode9.1
       compiler: clang
       env:
         - BREW_SKIP=true
+      script: *test_script
     # End clang OSX
 
