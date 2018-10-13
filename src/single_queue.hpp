@@ -14,7 +14,7 @@
 
 namespace ThreadPool
 {
-/*! \brief SQWM is a class implementating the ThreadPool interface.
+/*! \brief SingleQueue is a class implementating the ThreadPool interface.
  *
  *  When created, the pool will start the workers(threads) immediatly. The
  *  threads will only terminate when the pool is destroyed.

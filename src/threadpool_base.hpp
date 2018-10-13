@@ -45,8 +45,6 @@ public:
   {
   }
 
-  /*! \brief Stops the pool and clean all workers.
-   */
   virtual ~ThreadPoolBase()
   {
   }
@@ -64,7 +62,7 @@ public:
      when the shared_ptr is destroyed (which does not happen with raw pointer)
   */
 
-  /*! \brief Register a SingleQueue::Hooks class.
+  /*! \brief Register a ThreadPool::Hooks class.
    *  \param hooks The class to be registered
    */
   void register_hooks(std::shared_ptr<Hooks> hooks);
