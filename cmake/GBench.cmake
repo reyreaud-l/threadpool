@@ -14,6 +14,9 @@ ExternalProject_Add(googlebench
     GIT_TAG master
     PREFIX "${CMAKE_BINARY_DIR}/benchmark"
     INSTALL_DIR "${CMAKE_BINARY_DIR}/benchmark"
+    INSTALL_COMMAND ${CMAKE_COMMAND} --build . --target install > /dev/null
+    BUILD_BYPRODUCTS
+      ${CMAKE_BINARY_DIR}/benchmark/lib/libbenchmark.a
     CMAKE_CACHE_ARGS
       -DCMAKE_BUILD_TYPE:STRING=RELEASE
       -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>

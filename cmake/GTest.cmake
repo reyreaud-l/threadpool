@@ -19,6 +19,10 @@ ExternalProject_Add(googletest
     GIT_TAG master
     PREFIX "${CMAKE_BINARY_DIR}/googletest"
     INSTALL_DIR "${CMAKE_BINARY_DIR}/googletest"
+    INSTALL_COMMAND ${CMAKE_COMMAND} --build . --target install > /dev/null
+    BUILD_BYPRODUCTS
+      ${CMAKE_BINARY_DIR}/googletest/lib/libgtest_main.a
+      ${CMAKE_BINARY_DIR}/googletest/lib/libgtest.a
     CMAKE_CACHE_ARGS
       -DCMAKE_BUILD_TYPE:STRING=RELEASE
       -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
