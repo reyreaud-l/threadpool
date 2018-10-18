@@ -24,17 +24,22 @@ namespace ThreadPool
 /*! \brief ThreadPoolBase contains whats common to all threadpool implemented in
  *   this library.
  *
- *   It mainly regroup getter/setter for common attributes.
+ *   It mainly regroup getter/setter for common attributes. This class should
+ *   never be instantiated explicitely by the user. It should only be used in
+ *   the implementation of Threadpools.
  *
  */
 class ThreadPoolBase
 {
-public:
+protected:
   /*! \brief Constructs a ThreadPoolBase.
    *  \param pool_size Number of threads to start.
    *  \param max_pool_size Maximum number of threads allowed, this will be used
    *  by the pool to extend the number of threads temporarily when all threads
    *  are used.
+   *
+   *  This constructor is protected because we don't want the user to be able to
+   *  explicitely instantiate this class.
    */
   ThreadPoolBase(std::size_t pool_size, std::size_t max_pool_size)
     : _waiting_threads(0)
@@ -45,6 +50,7 @@ public:
   {
   }
 
+public:
   virtual ~ThreadPoolBase()
   {
   }

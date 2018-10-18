@@ -67,11 +67,9 @@ The unreleased modification are on the `staging` branch. The `master` branch
 contains all the releases.
 
 ## Tests
-To tests, enable option `BUILD_TESTS` or build in `DEBUG` mode with either:
+To tests, enable option `BUILD_TESTS`:
 ```bash
 $ cmake -DBUILD_TESTS=ON ..
-or
-$ cmake -DCMAKE_BUILD_TYPE=Debug ..
 ```
 
 Then the `check` target becomes available and you can build it running
