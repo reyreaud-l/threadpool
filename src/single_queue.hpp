@@ -102,7 +102,7 @@ private:
   private:
     /*! \brief Captured SingleQueue that the worker works for.
      */
-    SingleQueue* _pool;
+    SingleQueue* pool;
   };
 
   /*! \brief Start a worker for a nb_task.
@@ -126,22 +126,22 @@ private:
    *
    *  Emplacing in this vector construct and launch a thread.
    */
-  std::vector<std::thread> _pool;
+  std::vector<std::thread> pool;
 
   /*! \brief The task queue.
    *
    *  Access to this task queue should **always** be done while locking using
    *  _tasks_lock mutex.
    */
-  std::queue<std::packaged_task<void()>> _tasks;
+  std::queue<std::packaged_task<void()>> tasks;
 
   /*! \brief Mutex regulating acces to _tasks.
    */
-  std::mutex _tasks_lock;
+  std::mutex tasks_lock;
 
   /*! \brief Condition variable used in workers to wait for an available task.
    */
-  std::condition_variable _cv_variable;
+  std::condition_variable cv_variable;
 };
 
 template <typename Function, typename... Args>
@@ -161,14 +161,14 @@ auto SingleQueue::run(Function&& f, Args&&... args)
     this->check_spawn_single_worker();
 
     // Lock the queue and emplace move the ownership of the task inside
-    std::lock_guard<std::mutex> lock(this->_tasks_lock);
+    std::lock_guard<std::mutex> lock(tasks_lock);
 
-    if (this->_stop)
+    if (stopped)
       return result;
-    this->_tasks.emplace(std::move(inner_task));
+    tasks.emplace(std::move(inner_task));
   }
   // Notify one worker that a task is available
-  _cv_variable.notify_one();
+  cv_variable.notify_one();
   return result;
 }
 } // namespace ThreadPool

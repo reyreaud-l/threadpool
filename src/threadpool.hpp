@@ -62,7 +62,7 @@ public:
   /*! \brief Check the state of the threadpool
    *  \returns True if the pool is stopped, false otherwise.
    */
-  bool is_stop() const;
+  bool is_stopped() const;
 
   /*! \brief Check on the number of threads not currently working.
    *  \returns The number of threads currently waiting for a task.
@@ -155,9 +155,9 @@ inline void ThreadPool<Impl>::stop()
 }
 
 template <typename Impl>
-inline bool ThreadPool<Impl>::is_stop() const
+inline bool ThreadPool<Impl>::is_stopped() const
 {
-  return this->impl->is_stop();
+  return this->impl->is_stopped();
 }
 
 template <typename Impl>

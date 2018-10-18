@@ -2,24 +2,24 @@
 
 namespace ThreadPool
 {
-bool ThreadPoolBase::is_stop() const
+bool ThreadPoolBase::is_stopped() const
 {
-  return this->_stop;
+  return stopped;
 }
 
 std::size_t ThreadPoolBase::threads_available() const
 {
-  return this->_waiting_threads.load();
+  return waiting_threads.load();
 }
 
 std::size_t ThreadPoolBase::threads_working() const
 {
-  return this->_working_threads.load();
+  return working_threads.load();
 }
 
 void ThreadPoolBase::register_hooks(std::shared_ptr<Hooks> hooks)
 {
-  _hooks = hooks;
+  this->hooks = hooks;
 }
 
 } // namespace ThreadPool

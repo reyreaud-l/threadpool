@@ -13,9 +13,9 @@ protected:
 
 TEST_F(MultipleThread, StartStop)
 {
-  ASSERT_FALSE(pool->is_stop());
+  ASSERT_FALSE(pool->is_stopped());
   pool->stop();
-  ASSERT_TRUE(pool->is_stop());
+  ASSERT_TRUE(pool->is_stopped());
 }
 
 TEST_F(MultipleThread, SingleTask)

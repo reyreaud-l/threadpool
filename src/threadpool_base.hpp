@@ -8,15 +8,15 @@
 #define CALL_HOOK_WORKER(HOOK)                                                 \
   do                                                                           \
   {                                                                            \
-    if (_pool->_hooks)                                                         \
-      _pool->_hooks->HOOK();                                                   \
+    if (pool->hooks)                                                           \
+      pool->hooks->HOOK();                                                     \
   } while (0)
 
 #define CALL_HOOK_POOL(HOOK)                                                   \
   do                                                                           \
   {                                                                            \
-    if (_hooks)                                                                \
-      _hooks->HOOK();                                                          \
+    if (hooks)                                                                 \
+      hooks->HOOK();                                                           \
   } while (0)
 
 namespace ThreadPool
@@ -42,11 +42,11 @@ protected:
    *  explicitely instantiate this class.
    */
   ThreadPoolBase(std::size_t pool_size, std::size_t max_pool_size)
-    : _waiting_threads(0)
-    , _working_threads(0)
-    , _pool_size(pool_size)
-    , _max_pool_size(max_pool_size)
-    , _hooks(nullptr)
+    : waiting_threads(0)
+    , working_threads(0)
+    , pool_size(pool_size)
+    , max_pool_size(max_pool_size)
+    , hooks(nullptr)
   {
   }
 
@@ -76,7 +76,7 @@ public:
   /*! \brief Check the state of the threadpool
    *  \returns True if the bool is stopped, false otherwise.
    */
-  bool is_stop() const;
+  bool is_stopped() const;
 
   /*! \brief Check on the number of threads not currently working.
    *  \returns The number of threads currently waiting for a task.
@@ -97,31 +97,31 @@ public:
 protected:
   /*! \brief Number of waiting threads in the pool.
    */
-  std::atomic<std::size_t> _waiting_threads;
+  std::atomic<std::size_t> waiting_threads;
 
   /*! \brief Number of threads executing a task in the pool.
    */
-  std::atomic<std::size_t> _working_threads;
+  std::atomic<std::size_t> working_threads;
 
   /*! \brief Size of the pool.
    */
-  const std::size_t _pool_size;
+  const std::size_t pool_size;
 
   /*! \brief Max possible size of the pool.
    *
    *  This parameter is used to add additional threads if
    */
-  const std::size_t _max_pool_size;
+  const std::size_t max_pool_size;
 
   /*! \brief Boolean representing if the pool is stopped.
    *
    * Not an atomic as access to this boolean is always done under locking using
    * _tasks_lock_mutex.
    */
-  bool _stop = false;
+  bool stopped = false;
 
   /*! \brief Struct containing all hooks the threadpool will call.
    */
-  std::shared_ptr<Hooks> _hooks;
+  std::shared_ptr<Hooks> hooks;
 };
 } // namespace ThreadPool
