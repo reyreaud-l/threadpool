@@ -46,6 +46,7 @@ protected:
     , working_threads(0)
     , pool_size(pool_size)
     , max_pool_size(max_pool_size)
+    , stopped(false)
     , hooks(nullptr)
   {
   }
@@ -115,10 +116,8 @@ protected:
 
   /*! \brief Boolean representing if the pool is stopped.
    *
-   * Not an atomic as access to this boolean is always done under locking using
-   * _tasks_lock_mutex.
    */
-  bool stopped = false;
+  std::atomic<bool> stopped;
 
   /*! \brief Struct containing all hooks the threadpool will call.
    */

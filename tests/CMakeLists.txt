@@ -4,6 +4,7 @@ set(TESTS_EXEC tests)
 add_executable(${TESTS_EXEC}
   main.cpp
   single_queue.cpp
+  multiple_queue.cpp
   hooks.cpp
 )
 

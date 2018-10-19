@@ -5,6 +5,7 @@
 #include <type_traits>
 
 #include "hooks.hpp"
+#include "multiple_queue.hpp"
 #include "single_queue.hpp"
 
 /*! \brief ThreadPool is a class representing a group of threads.
