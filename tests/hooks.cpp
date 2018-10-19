@@ -1,57 +1,13 @@
-#include "tests.hpp"
+#include "hooks.hpp"
 
-struct TestHooks : public ThreadPool::Hooks
-{
-  void pre_task_hook() final
-  {
-    check_pre_task = true;
-  }
-
-  bool check_pre_task = false;
-
-  void post_task_hook() final
-  {
-    check_post_task = true;
-  }
-
-  bool check_post_task = false;
-
-  void on_worker_add() final
-  {
-    check_worker_add++;
-  }
-
-  int check_worker_add = 0;
-
-  void on_worker_die() final
-  {
-    check_worker_die++;
-  }
-
-  int check_worker_die = 0;
-};
-
-class THooks : public ::testing::Test
-{
-protected:
-  virtual void SetUp() final
-  {
-    pool = std::unique_ptr<ThreadPool::ThreadPool<>>(
-      new ThreadPool::ThreadPool<>(2));
-    hooks = std::shared_ptr<TestHooks>(new TestHooks());
-  }
-  std::unique_ptr<ThreadPool::ThreadPool<>> pool;
-  std::shared_ptr<TestHooks> hooks;
-};
-
-TEST_F(THooks, RegisterTHooksNoCall)
+TEST_F(TestHooks, RegisterTestHooksNoCall)
 {
   pool->register_hooks(hooks);
   ASSERT_FALSE(hooks->check_pre_task);
   ASSERT_FALSE(hooks->check_post_task);
 }
 
-TEST_F(THooks, CheckTaskTHooksCalled)
+TEST_F(TestHooks, CheckTaskTestHooksCalled)
 {
   pool->register_hooks(hooks);
   ASSERT_FALSE(hooks->check_pre_task);
@@ -71,7 +27,7 @@ TEST_F(THooks, CheckTaskTHooksCalled)
 // This tests abuse from sleep to simulate heaavy coreload.
 // In practice if a task is really quick to run and you launch them in a quick
 // succession, a new thread might not spawn.
-TEST_F(THooks, TestWorkerTHooksCalled)
+TEST_F(TestHooks, TestWorkerTestHooksCalled)
 {
   pool = std::unique_ptr<ThreadPool::ThreadPool<>>(
     new ThreadPool::ThreadPool<>(1, 3));

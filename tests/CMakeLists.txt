@@ -3,9 +3,7 @@ include(GTest)
 set(TESTS_EXEC tests)
 add_executable(${TESTS_EXEC}
   main.cpp
-  single_thread.cpp
-  multiple_thread.cpp
-  variable_thread.cpp
+  single_queue.cpp
   hooks.cpp
 )
 
