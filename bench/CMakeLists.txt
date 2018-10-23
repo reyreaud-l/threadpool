@@ -1,15 +1,12 @@
 include(GBench)
 
-set(BENCH_EXEC benchbin)
-add_executable(${BENCH_EXEC}
-  main.cpp
-)
+add_executable(benchbin main.cpp)
 
-target_link_libraries(${BENCH_EXEC} PRIVATE
+target_link_libraries(benchbin PRIVATE
   threadpool
   Threads::Threads
   benchmark
 )
-target_include_directories(${BENCH_EXEC} PRIVATE ${CMAKE_SOURCE_DIR}/bench)
+target_include_directories(benchbin PRIVATE ${CMAKE_SOURCE_DIR}/bench)
 
-add_custom_target(bench ${BENCH_EXEC} DEPENDS ${BENCH_EXEC} COMMENT "Running benchs...")
+add_custom_target(bench benchbin DEPENDS benchbin COMMENT "Running benchs...")

@@ -1,4 +1,4 @@
-add_library(threadpool SHARED
+add_library(threadpool
   single_queue.cpp
   multiple_queue.cpp
   threadpool_base.cpp
@@ -24,4 +24,8 @@ if(NOT TARGET uninstall)
   )
   add_custom_target(uninstall
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_MODULE_PATH}/uninstall.cmake)
+endif()
+
+if(CLANG_TIDY_EXE)
+  add_tidy_sources(threadpool)
 endif()

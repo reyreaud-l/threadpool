@@ -1,9 +1,5 @@
 #pragma once
 
-// DEBUG
-#include <iostream>
-// DEBUG
-
 #include <condition_variable>
 #include <functional>
 #include <future>
