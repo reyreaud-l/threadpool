@@ -12,6 +12,7 @@ target_include_directories(threadpool PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 # Install
 install(FILES threadpool.hpp DESTINATION include/threadpool)
 install(FILES single_queue.hpp DESTINATION include/threadpool)
+install(FILES multiple_queue.hpp DESTINATION include/threadpool)
 install(FILES hooks.hpp DESTINATION include/threadpool)
 install(TARGETS threadpool DESTINATION lib)
 
