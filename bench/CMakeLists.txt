@@ -1,6 +1,9 @@
 include(GBench)
 
-add_executable(benchbin main.cpp)
+add_executable(benchbin
+  EXCLUDE_FROM_ALL
+  main.cpp
+)
 
 target_link_libraries(benchbin PRIVATE
   threadpool

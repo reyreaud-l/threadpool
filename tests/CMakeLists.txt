@@ -1,6 +1,7 @@
 include(GTest)
 
 add_executable(tests
+  EXCLUDE_FROM_ALL
   main.cpp
   single_queue.cpp
   multiple_queue.cpp
