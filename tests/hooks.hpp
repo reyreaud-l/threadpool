@@ -15,28 +15,28 @@ struct DummyHooks : public ThreadPool::Hooks
     check_pre_task = true;
   }
 
-  bool check_pre_task = false;
+  std::atomic<bool> check_pre_task;
 
   void post_task_hook() final
   {
     check_post_task = true;
   }
 
-  bool check_post_task = false;
+  std::atomic<bool> check_post_task;
 
   void on_worker_add() final
   {
     check_worker_add++;
   }
 
-  int check_worker_add = 0;
+  std::atomic<int> check_worker_add;
 
   void on_worker_die() final
   {
     check_worker_die++;
   }
 
-  int check_worker_die = 0;
+  std::atomic<int> check_worker_die;
 };
 
 class TestHooks : public ::testing::Test
