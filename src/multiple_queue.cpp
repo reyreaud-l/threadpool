@@ -34,6 +34,14 @@ void MultipleQueue::stop()
   stopped = true;
   for (auto& w : workers)
   {
+    // This is needed in order for the worker to rerun the lambda in the
+    // condition variable to check the condition (stopped) and exit the wait.
+    // If this is not here, sometime a deadlock can occur as the thread will not
+    // check the stopped boolean and remain waiting, while the main thread try
+    // to join it and stops.
+    {
+      std::unique_lock<decltype(Worker::tasks_lock)> lock(w->tasks_lock);
+    }
     w->cv_variable.notify_all();
   }
 }

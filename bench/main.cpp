@@ -19,9 +19,9 @@ static void BM_ThreadPool_SingleQueue_NoBlockingTasks(benchmark::State& state)
   }
 }
 
-/*BENCHMARK(BM_ThreadPool_SingleQueue_NoBlockingTasks)
-  ->Range(8, 8 << 10)
-  ->Unit(benchmark::kMillisecond);*/
+BENCHMARK(BM_ThreadPool_SingleQueue_NoBlockingTasks)
+  ->Range(8, 8 << 14)
+  ->Unit(benchmark::kMillisecond);
 
 static void BM_ThreadPool_MultipleQueue_NoBlockingTasks(benchmark::State& state)
 {
@@ -40,7 +40,7 @@ static void BM_ThreadPool_MultipleQueue_NoBlockingTasks(benchmark::State& state)
 }
 
 BENCHMARK(BM_ThreadPool_MultipleQueue_NoBlockingTasks)
-  ->Range(8, 8 << 10)
+  ->Range(8, 8 << 14)
   ->Unit(benchmark::kMillisecond);
 
 BENCHMARK_MAIN();
