@@ -27,6 +27,6 @@ if(NOT TARGET uninstall)
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_MODULE_PATH}/uninstall.cmake)
 endif()
 
-if(CLANG_TIDY_EXE)
+if(ClangTidy)
   add_tidy_sources(threadpool)
 endif()
