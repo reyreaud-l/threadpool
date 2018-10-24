@@ -10,13 +10,30 @@ addons:
 
 script: &test_script
   - if [ $TRAVIS_OS_NAME = "osx" ]; then brew update >/dev/null; fi
-  - if [ $TRAVIS_OS_NAME = "osx" ] && [ $BREW_SKIP = "false" ]; then brew install $BREW_INSTALL; fi
+  - if [ $TRAVIS_OS_NAME = "osx" ] && [ $BREW_SKIP = "false" ]; then brew install $BREW_INSTALL;
+    fi
   - if [ $TRAVIS_OS_NAME = "osx" ]; then brew upgrade cmake; fi
   - mkdir build
   - cd build
-  - cmake -DCMAKE_BUILD_TYPE=RELEASE -DBUILD_TESTS=ON -DBUILD_EXAMPLES=ON ..
+  - cmake -DCMAKE_BUILD_TYPE=RELEASE -DBUILD_TESTS=ON -DBUILD_EXAMPLES=ON -DCMAKE_INSTALL_PREFIX=threadpool-${TRAVIS_TAG} ..
   - make check
   - make examples
+
+before_deploy:
+  - make install
+  - tar -cvjf ../threadpool-${TRAVIS_TAG}-${TRAVIS_OS_NAME}-x86_64.tar.bz2 threadpool-${TRAVIS_TAG}
+  - cd ..
+  - |
+    if [ "$TRAVIS_OS_NAME" = "osx" ]; then
+      brew install gnu-tar --with-default-names
+      export PATH="/usr/local/bin:$PATH"
+    fi
+  - ./cmake/git-archive-all.sh --prefix threadpool-${TRAVIS_TAG} threadpool-${TRAVIS_TAG}.tar && bzip2 $_
+
+
+stages:
+  - "Test Linux"
+  - "Test OSX"
 
 jobs:
   fast_finish: true
@@ -76,6 +93,7 @@ jobs:
       env:
         - CC=gcc-7
         - CXX=g++-7
+        - DEPLOY=true
       script: *test_script
     # End gcc
 
@@ -200,6 +218,7 @@ jobs:
         - BREW_INSTALL=gcc@7
         - CC=gcc-7
         - CXX=g++-7
+        - DEPLOY=true
       script: *test_script
     # End gcc OSX
 
@@ -223,3 +242,15 @@ jobs:
       script: *test_script
     # End clang OSX
 
+deploy:
+  provider: releases
+  skip_cleanup: true
+  api_key:
+    secure: I4wjzzMfonwvc7JCuhPDg3SNQ68b1Sz1r3jCu9UcHiCu90mpMTv0dxow1QTI/DCk7zH8DB9nA3KTvRABqcwlaVh/VIHy6ZJRrRqDl0QtqL5Ecq4BbdvSEz8Q9ShwGumFj/nlZ58FP+KrUZeR37HWL3Sej7r9nQm7/N6UpaPmzYVkrsHz6dS5n0HRBM6mgCUKc7R9oWkzEQ0ywcNQF6S4YH6yTFYMRQDh9XBDFqw7H5UzkWhKh7UNU1xIwsMWt+8zQyH50SsddsES8+JJQIxy/tguTXXAKFL+yHWyGBwKe9Ij8lRl7J6KF2QVJeCYscgyJl1oF8OC56lUiZ8tRmW4kIWeIFX2QyGQcj6VqrpTD1wve32E4k95nc5YzhfBCLsjIOvCcO2TcALXibuywFs8Dn/nyWRpj2P4YAaKXAMTlJnj+ITPbU9N+Sd27GlU8HHFrSXERL5AkN+4TOOw+oHXjyRwkkJxXrxkMfHjwXKwaDV2sm9oHGKurQFAfyZMbiPld+L0gDV3C6thslCJj0FBRNN/L7xsywOVV7JV3woAzyUxSLFFDPHSF/SCJZawGet/ogwnXom/dgSj/7vlg8RI9ymDL+XgNOw90CHY9rgHKZo+Fvsatl9jIm/MyA3Y7iMjXHw6MyMv2mbiJiGLmxAsGRPzy+1LMViHcgStByZ1fAM=
+  file:
+    - threadpool-${TRAVIS_TAG}-${TRAVIS_OS_NAME}-x86_64.tar.bz2
+    - threadpool-${TRAVIS_TAG}-${TRAVIS_OS_NAME}.tar.bz2
+  on:
+    tags: true
+    repo: reyreaud-l/threadpool
+    condition: $DEPLOY = true
