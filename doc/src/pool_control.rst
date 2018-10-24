@@ -26,7 +26,7 @@ You can stop the pool with:
 
 You can check if the pool is stopped with:
 
-.. doxygenfunction:: ThreadPool::ThreadPool::is_stop()
+.. doxygenfunction:: ThreadPool::ThreadPool::is_stopped()
 
 Checking the pool
 -----------------

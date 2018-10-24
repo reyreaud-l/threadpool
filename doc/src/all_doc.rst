@@ -19,7 +19,7 @@ Private ThreadPool Interface
 SQMW Implementation
 -------------------
 
-.. doxygenclass:: ThreadPool::SQMW
+.. doxygenclass:: ThreadPool::SingleQueue
    :members:
    :protected-members:
    :private-members:

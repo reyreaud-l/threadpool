@@ -2,16 +2,25 @@
 Modern C++ Thread Pool
 
 # Available features
-* Fixed size pool.
-* Variable size pool.
+* Multiples Threadpool implementation:
+  * Single queue multiple workers Threadpool.
+  * Multiple queue multiple workers Threadpool.
+* Fixed/Variable size pool (Adapt number of workers when under heavy load).
 * Fetch results of tasks run in the pool with `future`.
 * Fetch number of waiting/working workers.
 * Hooks to monitor the threadpool (tasks/workers)
 
 # Getting ThreadPool
 
-## Install
-To install, run the following commands to clone the repository and install
+## Github Releases
+
+You can get the latest pre-compiled releases for Linux x86\_64 and Mac OSX from
+the github release page.
+
+The latest release can be found [here](https://github.com/reyreaud-l/threadpool/releases/latest).
+
+## Install from source
+To install, run the following commands to clone the repository and install:
 ```bash
 $ git clone git@github.com:reyreaud-l/threadpool.git
 $ cd threadpool
@@ -25,6 +34,10 @@ To uninstall, run the following command in build directory.
 ```bash
 $ make uninstall
 ```
+
+# Changelog
+
+The changelog can be found in `doc/src/changelog.rst` or on [ReadTheDoc](https://threadpool.readthedocs.io/en/latest/src/changelog.html)
 
 # Using ThreadPool
 
