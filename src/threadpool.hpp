@@ -131,7 +131,11 @@ template <typename Impl>
 inline ThreadPool<Impl>::ThreadPool(std::size_t pool_size,
                                     std::size_t max_pool_size)
 {
+#if __cplusplus < 201402L
   impl = std::unique_ptr<Impl>(new Impl(pool_size, max_pool_size));
+#else
+  impl = std::make_unique<Impl>(pool_size, max_pool_size);
+#endif
 }
 
 template <typename Impl>
