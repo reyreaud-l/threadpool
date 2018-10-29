@@ -5,18 +5,6 @@ namespace ThreadPool
 // SingleQueue implementation
 // public:
 
-SingleQueue::SingleQueue()
-  : SingleQueue(std::thread::hardware_concurrency(),
-                std::thread::hardware_concurrency())
-{
-}
-
-SingleQueue::SingleQueue(std::size_t pool_size)
-  : SingleQueue(pool_size, pool_size)
-
-{
-}
-
 SingleQueue::SingleQueue(std::size_t pool_size, std::size_t max_pool_size)
   : ThreadPoolBase(pool_size, max_pool_size)
 {

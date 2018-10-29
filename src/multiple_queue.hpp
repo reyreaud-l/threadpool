@@ -26,17 +26,6 @@ class MultipleQueue : public ThreadPoolBase
 {
 public:
   /*! \brief Constructs a MultipleQueue.
-   *  The pool size will be detucted from number of threads available on the
-   *  machine/
-   */
-  MultipleQueue();
-
-  /*! \brief Constructs a MultipleQueue.
-   *  \param pool_size Number of threads to start.
-   */
-  MultipleQueue(std::size_t pool_size);
-
-  /*! \brief Constructs a MultipleQueue.
    *  \param pool_size Number of threads to start.
    *  \param max_pool_size Maximum number of threads allowed, this will be used
    *  by the pool to extend the number of threads temporarily when all threads

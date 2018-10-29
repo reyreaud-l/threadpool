@@ -5,18 +5,6 @@ namespace ThreadPool
 // MultipleQueue implementation
 // public:
 
-MultipleQueue::MultipleQueue()
-  : MultipleQueue(std::thread::hardware_concurrency(),
-                  std::thread::hardware_concurrency())
-{
-}
-
-MultipleQueue::MultipleQueue(std::size_t pool_size)
-  : MultipleQueue(pool_size, pool_size)
-
-{
-}
-
 MultipleQueue::MultipleQueue(std::size_t pool_size, std::size_t max_pool_size)
   : ThreadPoolBase(pool_size, max_pool_size)
 {

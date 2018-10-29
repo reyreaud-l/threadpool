@@ -26,17 +26,6 @@ class SingleQueue : public ThreadPoolBase
 {
 public:
   /*! \brief Constructs a SingleQueue.
-   *  The pool size will be detucted from number of threads available on the
-   *  machine/
-   */
-  SingleQueue();
-
-  /*! \brief Constructs a SingleQueue.
-   *  \param pool_size Number of threads to start.
-   */
-  SingleQueue(std::size_t pool_size);
-
-  /*! \brief Constructs a SingleQueue.
    *  \param pool_size Number of threads to start.
    *  \param max_pool_size Maximum number of threads allowed, this will be used
    *  by the pool to extend the number of threads temporarily when all threads
