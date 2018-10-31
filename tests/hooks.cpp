@@ -24,13 +24,10 @@ TEST_F(TestHooks, CheckTaskTestHooksCalled)
   ASSERT_TRUE(hooks->check_post_task);
 }
 
-// This tests abuse from sleep to simulate heaavy coreload.
-// In practice if a task is really quick to run and you launch them in a quick
-// succession, a new thread might not spawn.
 TEST_F(TestHooks, TestWorkerTestHooksCalled)
 {
-  pool = std::unique_ptr<ThreadPool::ThreadPool<>>(
-    new ThreadPool::ThreadPool<>(1, 3));
+  pool =
+    std::unique_ptr<ThreadPool::ThreadPool>(new ThreadPool::ThreadPool(1, 1));
   pool->register_hooks(hooks);
 
   std::size_t nb_tests = 3;
@@ -40,11 +37,9 @@ TEST_F(TestHooks, TestWorkerTestHooksCalled)
   for (std::size_t i = 0; i < nb_tests; i++)
   {
     results.push_back(pool->run([]() {
-      // Occupy thread for 5 secs
-      std::this_thread::sleep_for(std::chrono::seconds(5));
+      std::this_thread::sleep_for(std::chrono::seconds(1));
       return 0;
     }));
-    std::this_thread::sleep_for(std::chrono::seconds(1));
   }
 
   // Check results
@@ -54,7 +49,8 @@ TEST_F(TestHooks, TestWorkerTestHooksCalled)
   // Delete the threadpool
   pool.reset();
 
-  // 2 worker should have been added
-  ASSERT_EQ(hooks->check_worker_add, 2);
-  ASSERT_EQ(hooks->check_worker_die, 3);
+  // 0 worker should have been added
+  // 3 worker should have been died
+  ASSERT_EQ(hooks->check_worker_add, 0);
+  ASSERT_EQ(hooks->check_worker_die, 1);
 }

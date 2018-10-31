@@ -16,6 +16,7 @@ Added
 
 Changed
 ~~~~~~~
+- ThreadPool implementation is now using multiple queues with multiple workers.
 - Remove hook copy overload (it was wrong)
 - Changed dependency management (gtest/gbench) to be downloaded at compile time
   and not at configure time.

@@ -1,26 +1,17 @@
 ThreadPool Doxygen
 ==================
 
-Public ThreadPool Interface
----------------------------
+Public ThreadPool
+-----------------
 
 .. doxygenclass:: ThreadPool::ThreadPool
    :members:
    :protected-members:
    :no-link:
 
-Private ThreadPool Interface
-----------------------------
+Private ThreadPool
+------------------
 
 .. doxygenclass:: ThreadPool::ThreadPool
-   :private-members:
-   :no-link:
-
-SQMW Implementation
--------------------
-
-.. doxygenclass:: ThreadPool::SingleQueue
-   :members:
-   :protected-members:
    :private-members:
    :no-link:

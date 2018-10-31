@@ -30,7 +30,7 @@ else()
   message(STATUS "clang-tidy found: ${ClangTidy}")
 endif()
 
-add_subdirectory(src)
+add_subdirectory(include)
 
 # Tests and bench
 if (BUILD_TESTS)

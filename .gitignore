@@ -2,6 +2,7 @@ tags
 doxyxml
 _build
 build
+env
 
 # Prerequisites
 *.d

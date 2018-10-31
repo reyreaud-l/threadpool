@@ -8,20 +8,16 @@
 #include <thread>
 #include <utility>
 
-class MultipleQueue : public ::testing::Test
+class ThreadPoolTest : public ::testing::Test
 {
 protected:
   virtual void SetUp() final
   {
     single_thread_pool =
-      std::unique_ptr<ThreadPool::ThreadPool<ThreadPool::MultipleQueue>>(
-        new ThreadPool::ThreadPool<ThreadPool::MultipleQueue>(1));
+      std::unique_ptr<ThreadPool::ThreadPool>(new ThreadPool::ThreadPool(1));
     multiple_thread_pool =
-      std::unique_ptr<ThreadPool::ThreadPool<ThreadPool::MultipleQueue>>(
-        new ThreadPool::ThreadPool<ThreadPool::MultipleQueue>(2));
+      std::unique_ptr<ThreadPool::ThreadPool>(new ThreadPool::ThreadPool(2));
   }
-  std::unique_ptr<ThreadPool::ThreadPool<ThreadPool::MultipleQueue>>
-    single_thread_pool;
-  std::unique_ptr<ThreadPool::ThreadPool<ThreadPool::MultipleQueue>>
-    multiple_thread_pool;
+  std::unique_ptr<ThreadPool::ThreadPool> single_thread_pool;
+  std::unique_ptr<ThreadPool::ThreadPool> multiple_thread_pool;
 };

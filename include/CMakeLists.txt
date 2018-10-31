@@ -1,20 +1,6 @@
-add_library(threadpool
-  single_queue.cpp
-  multiple_queue.cpp
-  threadpool_base.cpp
-
-  threadpool.hpp
-  multiple_queue.hpp
-  threadpool_base.hpp
-)
-target_include_directories(threadpool PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-
 # Install
 install(FILES threadpool.hpp DESTINATION include/threadpool)
-install(FILES single_queue.hpp DESTINATION include/threadpool)
-install(FILES multiple_queue.hpp DESTINATION include/threadpool)
 install(FILES hooks.hpp DESTINATION include/threadpool)
-install(TARGETS threadpool DESTINATION lib)
 
 # Uninstall target
 if(NOT TARGET uninstall)
@@ -28,5 +14,6 @@ if(NOT TARGET uninstall)
 endif()
 
 if(ClangTidy)
-  add_tidy_sources(threadpool)
+  add_tidy_sources(threadpool.hpp)
+  add_tidy_sources(hooks.hpp)
 endif()

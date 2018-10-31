@@ -1,6 +1,7 @@
 #pragma once
 
 #include "threadpool.hpp"
+
 #include <chrono>
 #include <future>
 #include <gtest/gtest.h>
@@ -44,10 +45,10 @@ class TestHooks : public ::testing::Test
 protected:
   virtual void SetUp() final
   {
-    pool = std::unique_ptr<ThreadPool::ThreadPool<>>(
-      new ThreadPool::ThreadPool<>(2));
+    pool =
+      std::unique_ptr<ThreadPool::ThreadPool>(new ThreadPool::ThreadPool(2));
     hooks = std::shared_ptr<DummyHooks>(new DummyHooks());
   }
-  std::unique_ptr<ThreadPool::ThreadPool<>> pool;
+  std::unique_ptr<ThreadPool::ThreadPool> pool;
   std::shared_ptr<DummyHooks> hooks;
 };
