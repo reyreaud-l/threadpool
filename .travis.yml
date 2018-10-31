@@ -10,15 +10,21 @@ addons:
 
 script: &test_script
   - if [ $TRAVIS_OS_NAME = "osx" ]; then brew update >/dev/null; fi
-  - if [ $TRAVIS_OS_NAME = "osx" ] && [ $BREW_SKIP = "false" ]; then brew install $BREW_INSTALL;
-    fi
   - if [ $TRAVIS_OS_NAME = "osx" ]; then brew upgrade cmake; fi
   - mkdir build
   - cd build
-  - cmake -DCMAKE_BUILD_TYPE=RELEASE -DBUILD_TESTS=ON -DBUILD_EXAMPLES=ON -DCMAKE_INSTALL_PREFIX=threadpool-${TRAVIS_TAG} ..
+  - cmake -DCMAKE_BUILD_TYPE=RELEASE -DBUILD_TESTS=ON -DCMAKE_INSTALL_PREFIX=threadpool-${TRAVIS_TAG} ..
   - make check
-  - make examples
 
+example_script: &example_script
+  - if [ $TRAVIS_OS_NAME = "osx" ]; then brew update >/dev/null; fi
+  - if [ $TRAVIS_OS_NAME = "osx" ]; then brew upgrade cmake; fi
+  - mkdir build
+  - cd build
+  - cmake -DCMAKE_BUILD_TYPE=RELEASE -DBUILD_EXAMPLES=ON -DCMAKE_INSTALL_PREFIX=threadpool-${TRAVIS_TAG} ..
+  - make install
+  - make examples
+    
 before_deploy:
   - make install
   - tar -cvjf ../threadpool-${TRAVIS_TAG}-${TRAVIS_OS_NAME}-x86_64.tar.bz2 threadpool-${TRAVIS_TAG}
@@ -32,15 +38,15 @@ before_deploy:
 
 
 stages:
-  - "Test Linux"
-  - "Test OSX"
+  - "Tests"
+  - "Install & Examples"
 
 jobs:
   fast_finish: true
   include:
     # Begin gcc
     - os: linux
-      stage: "Test Linux"
+      stage: "Tests"
       name: "Linux GCC 4.9"
       addons:
         apt:
@@ -54,7 +60,7 @@ jobs:
       script: *test_script
 
     - os: linux
-      stage: "Test Linux"
+      stage: "Tests"
       name: "Linux GCC 5"
       addons:
         apt:
@@ -68,7 +74,7 @@ jobs:
       script: *test_script
 
     - os: linux
-      stage: "Test Linux"
+      stage: "Tests"
       name: "Linux GCC 6"
       addons:
         apt:
@@ -82,7 +88,7 @@ jobs:
       script: *test_script
 
     - os: linux
-      stage: "Test Linux"
+      stage: "Tests"
       name: "Linux GCC 7"
       addons:
         apt:
@@ -93,13 +99,27 @@ jobs:
       env:
         - CC=gcc-7
         - CXX=g++-7
+      script: *test_script
+
+    - os: linux
+      stage: "Tests"
+      name: "Linux GCC 8"
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-8
+      env:
+        - CC=gcc-8
+        - CXX=g++-8
         - DEPLOY=true
       script: *test_script
     # End gcc
 
     # Begin Clang
     - os: linux
-      stage: "Test Linux"
+      stage: "Tests"
       name: "Linux Clang 3.6"
       addons:
         apt:
@@ -114,7 +134,7 @@ jobs:
       script: *test_script
 
     - os: linux
-      stage: "Test Linux"
+      stage: "Tests"
       name: "Linux Clang 3.7"
       addons:
         apt:
@@ -129,7 +149,7 @@ jobs:
       script: *test_script
 
     - os: linux
-      stage: "Test Linux"
+      stage: "Tests"
       name: "Linux Clang 3.8"
       addons:
         apt:
@@ -144,7 +164,7 @@ jobs:
       script: *test_script
 
     - os: linux
-      stage: "Test Linux"
+      stage: "Tests"
       name: "Linux Clang 3.9"
       addons:
         apt:
@@ -158,7 +178,7 @@ jobs:
       script: *test_script
 
     - os: linux
-      stage: "Test Linux"
+      stage: "Tests"
       name: "Linux Clang 4.0"
       addons:
         apt:
@@ -172,7 +192,7 @@ jobs:
       script: *test_script
 
     - os: linux
-      stage: "Test Linux"
+      stage: "Tests"
       name: "Linux Clang 5.0"
       addons:
         apt:
@@ -184,61 +204,95 @@ jobs:
         - CC=clang-5.0
         - CXX=clang++-5.0
       script: *test_script
+
+    - os: linux
+      stage: "Tests"
+      name: "Linux Clang 6.0"
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-6.0
+          packages:
+            - clang-6.0
+      env:
+        - CC=clang-6.0
+        - CXX=clang++-6.0
+      script: *test_script
     # End Clang
 
-    # Begin gcc OSX
+    # Begin OSX
     - os: osx
-      stage: "Test OSX"
-      name: "OSX GCC 5"
-      osx_image: xcode8
-      env:
-        - BREW_SKIP=false
-        - BREW_INSTALL=gcc@5
-        - CC=gcc-5
-        - CXX=g++-5
+      stage: "Tests"
+      name: "OSX Clang xcode6.4"
+      osx_image: xcode6.4
       script: *test_script
 
     - os: osx
-      stage: "Test OSX"
-      name: "OSX GCC 6"
-      osx_image: xcode8
-      env:
-        - BREW_SKIP=false
-        - BREW_INSTALL=gcc@6
-        - CC=gcc-6
-        - CXX=g++-6
+      stage: "Tests"
+      name: "OSX Clang xcode7.3"
+      osx_image: xcode7.3
       script: *test_script
 
     - os: osx
-      stage: "Test OSX"
-      name: "OSX GCC 7"
+      stage: "Tests"
+      name: "OSX Clang xcode8"
       osx_image: xcode8
-      env:
-        - BREW_SKIP=false
-        - BREW_INSTALL=gcc@7
-        - CC=gcc-7
-        - CXX=g++-7
-        - DEPLOY=true
       script: *test_script
-    # End gcc OSX
 
-    # Begin clang OSX
     - os: osx
-      stage: "Test OSX"
+      stage: "Tests"
+      name: "OSX Clang xcode8.1"
+      osx_image: xcode8.1
+      script: *test_script
+
+    - os: osx
+      stage: "Tests"
+      name: "OSX Clang xcode8.2"
+      osx_image: xcode8.2
+      script: *test_script
+
+    - os: osx
+      stage: "Tests"
       name: "OSX Clang xcode8.3"
       osx_image: xcode8.3
-      compiler: clang
-      env:
-        - BREW_SKIP=true
       script: *test_script
 
     - os: osx
-      stage: "Test OSX"
+      stage: "Tests"
+      name: "OSX Clang xcode9"
+      osx_image: xcode9
+      script: *test_script
+
+    - os: osx
+      stage: "Tests"
       name: "OSX Clang xcode9.1"
       osx_image: xcode9.1
-      compiler: clang
+      script: *test_script
+
+    - os: osx
+      stage: "Tests"
+      name: "OSX Clang xcode9.2"
+      osx_image: xcode9.2
+      script: *test_script
+
+    - os: osx
+      stage: "Tests"
+      name: "OSX Clang xcode9.3"
+      osx_image: xcode9.3
+      script: *test_script
+
+    - os: osx
+      stage: "Tests"
+      name: "OSX Clang xcode9.4"
+      osx_image: xcode9.4
+      script: *test_script
+
+    - os: osx
+      stage: "Tests"
+      name: "OSX Clang xcode10"
+      osx_image: xcode10
       env:
-        - BREW_SKIP=true
+        - DEPLOY=true
       script: *test_script
     # End clang OSX
 
