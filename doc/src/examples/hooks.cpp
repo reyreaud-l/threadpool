@@ -18,7 +18,7 @@ struct TestHooks : public ThreadPool::Hooks
 
 int main(void)
 {
-  ThreadPool::ThreadPool<> pool(1);
+  ThreadPool::ThreadPool pool(1);
   std::shared_ptr<TestHooks> hooks(new TestHooks());
   pool.register_hooks(hooks);
 
