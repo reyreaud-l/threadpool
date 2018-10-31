@@ -49,7 +49,7 @@ ThreadPool is tested on these platforms/compilers:
   - gcc: 4.9, 5, 6, 7, 8
   - clang: 3.6, 3.7, 3.8, 3.9, 4.0, 5.0, 6.0
 - OSX
-  - clang xcode: 6.4, 7.3, 8, 8.1, 8.2, 8.3, 9, 9.1, 9.2, 9.3, 9.4, 10
+  - clang xcode: 7.3, 8, 8.1, 8.2, 8.3, 9, 9.1, 9.2, 9.3, 9.4, 10
 
 # Contributing ThreadPool
 

@@ -212,7 +212,9 @@ jobs:
         apt:
           sources:
             - llvm-toolchain-trusty-6.0
+            - ubuntu-toolchain-r-test
           packages:
+            - g++-6
             - clang-6.0
       env:
         - CC=clang-6.0
@@ -221,12 +223,6 @@ jobs:
     # End Clang
 
     # Begin OSX
-    - os: osx
-      stage: "Tests"
-      name: "OSX Clang xcode6.4"
-      osx_image: xcode6.4
-      script: *test_script
-
     - os: osx
       stage: "Tests"
       name: "OSX Clang xcode7.3"
