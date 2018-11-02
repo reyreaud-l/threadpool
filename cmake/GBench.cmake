@@ -35,10 +35,10 @@ if("${GTEST_BUILD_TYPE}" STREQUAL "DEBUG")
   set(LIB_SUFFIX "d${CMAKE_STATIC_LIBRARY_SUFFIX}")
 endif()
 
-foreach(LIB benchmark)
+foreach(LIB benchmark::benchmark)
   add_library(${LIB} UNKNOWN IMPORTED)
   set_target_properties(${LIB} PROPERTIES
-    IMPORTED_LOCATION ${install_dir}/lib/${LIB_PREFIX}${LIB}${LIB_SUFFIX}
+    IMPORTED_LOCATION ${install_dir}/lib/${LIB_PREFIX}benchmark${LIB_SUFFIX}
     INTERFACE_INCLUDE_DIRECTORIES ${BENCHMARK_INCLUDE_DIRS}
     INTERFACE_LINK_LIBRARIES "benchmark"
   )

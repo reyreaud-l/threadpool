@@ -13,21 +13,12 @@ script: &test_script
   - if [ $TRAVIS_OS_NAME = "osx" ]; then brew upgrade cmake; fi
   - mkdir build
   - cd build
-  - cmake -DCMAKE_BUILD_TYPE=RELEASE -DBUILD_TESTS=ON -DCMAKE_INSTALL_PREFIX=threadpool-${TRAVIS_TAG} ..
+  - cmake -DDOWNLOAD_DEPENDENCIES=ON -DCMAKE_BUILD_TYPE=RELEASE -DBUILD_EXAMPLES=ON -DCMAKE_INSTALL_PREFIX=threadpool-${TRAVIS_TAG} ..
   - make check
-
-example_script: &example_script
-  - if [ $TRAVIS_OS_NAME = "osx" ]; then brew update >/dev/null; fi
-  - if [ $TRAVIS_OS_NAME = "osx" ]; then brew upgrade cmake; fi
-  - mkdir build
-  - cd build
-  - cmake -DCMAKE_BUILD_TYPE=RELEASE -DBUILD_EXAMPLES=ON -DCMAKE_INSTALL_PREFIX=threadpool-${TRAVIS_TAG} ..
-  - make install
-  - make examples
     
 before_deploy:
   - make install
-  - tar -cvjf ../threadpool-${TRAVIS_TAG}-${TRAVIS_OS_NAME}-x86_64.tar.bz2 threadpool-${TRAVIS_TAG}
+  - tar -cvjf ../threadpool-${TRAVIS_TAG}.tar.bz2 threadpool-${TRAVIS_TAG}
   - cd ..
   - |
     if [ "$TRAVIS_OS_NAME" = "osx" ]; then
@@ -39,7 +30,6 @@ before_deploy:
 
 stages:
   - "Tests"
-  - "Install & Examples"
 
 jobs:
   fast_finish: true
@@ -287,8 +277,6 @@ jobs:
       stage: "Tests"
       name: "OSX Clang xcode10"
       osx_image: xcode10
-      env:
-        - DEPLOY=true
       script: *test_script
     # End clang OSX
 
@@ -298,8 +286,7 @@ deploy:
   api_key:
     secure: I4wjzzMfonwvc7JCuhPDg3SNQ68b1Sz1r3jCu9UcHiCu90mpMTv0dxow1QTI/DCk7zH8DB9nA3KTvRABqcwlaVh/VIHy6ZJRrRqDl0QtqL5Ecq4BbdvSEz8Q9ShwGumFj/nlZ58FP+KrUZeR37HWL3Sej7r9nQm7/N6UpaPmzYVkrsHz6dS5n0HRBM6mgCUKc7R9oWkzEQ0ywcNQF6S4YH6yTFYMRQDh9XBDFqw7H5UzkWhKh7UNU1xIwsMWt+8zQyH50SsddsES8+JJQIxy/tguTXXAKFL+yHWyGBwKe9Ij8lRl7J6KF2QVJeCYscgyJl1oF8OC56lUiZ8tRmW4kIWeIFX2QyGQcj6VqrpTD1wve32E4k95nc5YzhfBCLsjIOvCcO2TcALXibuywFs8Dn/nyWRpj2P4YAaKXAMTlJnj+ITPbU9N+Sd27GlU8HHFrSXERL5AkN+4TOOw+oHXjyRwkkJxXrxkMfHjwXKwaDV2sm9oHGKurQFAfyZMbiPld+L0gDV3C6thslCJj0FBRNN/L7xsywOVV7JV3woAzyUxSLFFDPHSF/SCJZawGet/ogwnXom/dgSj/7vlg8RI9ymDL+XgNOw90CHY9rgHKZo+Fvsatl9jIm/MyA3Y7iMjXHw6MyMv2mbiJiGLmxAsGRPzy+1LMViHcgStByZ1fAM=
   file:
-    - threadpool-${TRAVIS_TAG}-${TRAVIS_OS_NAME}-x86_64.tar.bz2
-    - threadpool-${TRAVIS_TAG}-${TRAVIS_OS_NAME}.tar.bz2
+    - threadpool-${TRAVIS_TAG}.tar.bz2
   on:
     tags: true
     repo: reyreaud-l/threadpool

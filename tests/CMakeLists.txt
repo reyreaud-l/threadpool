@@ -1,4 +1,8 @@
-include(GTest)
+if (DOWNLOAD_DEPENDENCIES)
+  include(GTest)
+else()
+  find_package(GTest REQUIRED)
+endif()
 
 add_executable(tests
   EXCLUDE_FROM_ALL
@@ -8,7 +12,7 @@ add_executable(tests
 )
 
 target_link_libraries(tests PRIVATE
-  gtest_main
+  GTest::GTest
   Threads::Threads
 )
 target_include_directories(tests PRIVATE

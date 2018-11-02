@@ -40,12 +40,10 @@ if("${GTEST_BUILD_TYPE}" STREQUAL "DEBUG")
   set(LIB_SUFFIX "d${CMAKE_STATIC_LIBRARY_SUFFIX}")
 endif()
 
-# Use gmock_main instead of gtest_main because it initializes gtest as well.
-# Note: The libraries are listed in reverse order of their dependancies.
-foreach(LIB gtest gtest_main)
+foreach(LIB GTest::GTest)
   add_library(${LIB} UNKNOWN IMPORTED)
   set_target_properties(${LIB} PROPERTIES
-    IMPORTED_LOCATION ${install_dir}/lib/${LIB_PREFIX}${LIB}${LIB_SUFFIX}
+    IMPORTED_LOCATION ${install_dir}/lib/${LIB_PREFIX}gtest${LIB_SUFFIX}
     INTERFACE_INCLUDE_DIRECTORIES ${GTEST_INCLUDE_DIRS}
     INTERFACE_LINK_LIBRARIES "gtest"
   )

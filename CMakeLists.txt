@@ -5,6 +5,8 @@ project(${LIB} LANGUAGES CXX VERSION 2.0.0)
 option(BUILD_TESTS "Build tests" OFF)
 option(BUILD_EXAMPLES "Build examples" OFF)
 
+option(DOWNLOAD_DEPENDENCIES "Download dependencies" OFF)
+
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 # If no build type is set, set to release.

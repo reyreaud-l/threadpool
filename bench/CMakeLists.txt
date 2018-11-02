@@ -1,4 +1,8 @@
-include(GBench)
+if (DOWNLOAD_DEPENDENCIES)
+  include(GBench)
+else()
+  find_package(benchmark REQUIRED)
+endif()
 
 add_executable(benchbin
   EXCLUDE_FROM_ALL
@@ -7,7 +11,7 @@ add_executable(benchbin
 
 target_link_libraries(benchbin PRIVATE
   Threads::Threads
-  benchmark
+  benchmark::benchmark
 )
 target_include_directories(benchbin PRIVATE
   ${CMAKE_SOURCE_DIR}/bench
