@@ -3,7 +3,6 @@ Modern C++ Thread Pool
 
 # Available features
 * Multiple queue multiple workers Threadpool.
-* Fixed/Variable size pool (Adapt number of workers when under heavy load).
 * Fetch results of tasks run in the pool with `future`.
 * Fetch number of waiting/working workers.
 * Hooks to monitor the threadpool (tasks/workers)

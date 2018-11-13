@@ -7,8 +7,8 @@ endif()
 add_executable(tests
   EXCLUDE_FROM_ALL
   main.cpp
-  multiple_queue.cpp
-  hooks.cpp
+  threadpool_test.cpp
+  hooks_test.cpp
 )
 
 target_link_libraries(tests PRIVATE

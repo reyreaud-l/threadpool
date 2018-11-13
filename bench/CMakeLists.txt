@@ -7,6 +7,7 @@ endif()
 add_executable(benchbin
   EXCLUDE_FROM_ALL
   main.cpp
+  utils.cpp
 )
 
 target_link_libraries(benchbin PRIVATE

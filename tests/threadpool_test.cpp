@@ -1,4 +1,4 @@
-#include "multiple_queue.hpp"
+#include "threadpool_test.hpp"
 
 TEST_F(ThreadPoolTest, SingleThreadStartStop)
 {
@@ -13,6 +13,7 @@ TEST_F(ThreadPoolTest, SingleThreadSingleTask)
 
   result = single_thread_pool->run([]() -> bool { return true; });
 
+  ASSERT_TRUE(result.valid());
   ASSERT_TRUE(result.get());
 }
 

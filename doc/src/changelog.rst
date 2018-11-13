@@ -21,6 +21,11 @@ Changed
 - Changed dependency management (gtest/gbench) to be downloaded at compile time
   and not at configure time.
 
+Removed
+~~~~~~~
+- The ThreadPool is now a fixed size pool. I removed the ability to adapt the
+  number of threads at runtime.
+
 [2.0.0] - 2018-09-21
 --------------------
 Added

@@ -1,4 +1,4 @@
-#include "hooks.hpp"
+#include "hooks_test.hpp"
 
 TEST_F(TestHooks, RegisterTestHooksNoCall)
 {
@@ -26,9 +26,8 @@ TEST_F(TestHooks, CheckTaskTestHooksCalled)
 
 TEST_F(TestHooks, TestWorkerTestHooksCalled)
 {
-  pool =
-    std::unique_ptr<ThreadPool::ThreadPool>(new ThreadPool::ThreadPool(1, 1));
-  pool->register_hooks(hooks);
+  pool = std::unique_ptr<ThreadPool::ThreadPool>(
+    new ThreadPool::ThreadPool(1, hooks));
 
   std::size_t nb_tests = 3;
   std::vector<std::future<int>> results;
@@ -49,8 +48,8 @@ TEST_F(TestHooks, TestWorkerTestHooksCalled)
   // Delete the threadpool
   pool.reset();
 
-  // 0 worker should have been added
-  // 3 worker should have been died
-  ASSERT_EQ(hooks->check_worker_add, 0);
+  // 1 worker should have been added
+  // 1 worker should have been died
+  ASSERT_EQ(hooks->check_worker_add, 1);
   ASSERT_EQ(hooks->check_worker_die, 1);
 }
