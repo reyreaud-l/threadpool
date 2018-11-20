@@ -3,6 +3,7 @@ doxyxml
 _build
 build
 env
+cmake/uninstall.cmake
 
 # Prerequisites
 *.d

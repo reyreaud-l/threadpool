@@ -1,7 +1,7 @@
 Pool Performance
 ================
 
-The pool performance can be measured using benchmarks, here are some benchmark values as of 3.0.0.
+The pool performance can be measured using benchmarks.
 
 Benchmark with neighbors work stealing enabled::
 

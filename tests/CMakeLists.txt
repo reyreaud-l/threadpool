@@ -10,7 +10,7 @@ add_executable(tests
   threadpool_test.cpp
   hooks_test.cpp
 )
-
+target_compile_options(tests PRIVATE -std=c++11)
 target_link_libraries(tests PRIVATE
   GTest::GTest
   Threads::Threads

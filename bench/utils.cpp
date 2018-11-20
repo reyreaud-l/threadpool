@@ -18,11 +18,7 @@ std::string expensive(std::size_t work_to_do)
     std::string const& item = container[i];
     if (item != std::to_string(i))
     {
-      // Marked NOLINT to avoid clang-tidy cert-err60-cpp error which we cannot
-      // avoid on some linux distros where std::runtime_error is not properly
-      // marked noexcept. Details at
-      // https://www.securecoding.cert.org/confluence/display/cplusplus/ERR60-CPP.+Exception+objects+must+be+nothrow+copy+constructible
-      throw std::runtime_error("Uh oh, this should never happen"); // NOLINT
+      throw std::runtime_error("Uh oh, this should never happen");
     }
   }
 

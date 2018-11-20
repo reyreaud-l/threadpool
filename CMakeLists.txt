@@ -20,7 +20,6 @@ find_package(Threads REQUIRED)
 find_program(ClangTidy NAMES "clang-tidy" DOC "Path to clang-tidy executable")
 
 # Compilation settings (for tests mainly)
-set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wpedantic")
 set(CMAKE_CXX_FLAGS_DEBUG "-g3 -O0 -fsanitize=address")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
