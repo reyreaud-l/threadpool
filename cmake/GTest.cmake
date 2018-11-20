@@ -45,7 +45,6 @@ foreach(LIB GTest::GTest)
   set_target_properties(${LIB} PROPERTIES
     IMPORTED_LOCATION ${install_dir}/lib/${LIB_PREFIX}gtest${LIB_SUFFIX}
     INTERFACE_INCLUDE_DIRECTORIES ${GTEST_INCLUDE_DIRS}
-    INTERFACE_LINK_LIBRARIES "gtest"
   )
   add_dependencies(${LIB} googletest)
 endforeach()
