@@ -13,7 +13,7 @@ script: &test_script
   - if [ $TRAVIS_OS_NAME = "osx" ]; then brew upgrade cmake; fi
   - mkdir build
   - cd build
-  - cmake -DDOWNLOAD_DEPENDENCIES=ON -DCMAKE_BUILD_TYPE=RELEASE -DBUILD_EXAMPLES=ON -DCMAKE_INSTALL_PREFIX=threadpool-${TRAVIS_TAG} ..
+  - cmake -DBUILD_TESTS=ON -DDOWNLOAD_DEPENDENCIES=ON -DCMAKE_BUILD_TYPE=RELEASE -DBUILD_EXAMPLES=ON -DCMAKE_INSTALL_PREFIX=threadpool-${TRAVIS_TAG} ..
   - make check
     
 before_deploy:
