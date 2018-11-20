@@ -29,7 +29,7 @@ static void bm_work_tasks(benchmark::State& state)
   }
 }
 
-BENCHMARK(bm_work_tasks)->Range(8, 8 << 20)->Unit(benchmark::kMillisecond);
+BENCHMARK(bm_work_tasks)->Range(8, 8 << 18)->Unit(benchmark::kMillisecond);
 
 static void bm_blocking_tasks(benchmark::State& state)
 {
@@ -41,8 +41,8 @@ static void bm_blocking_tasks(benchmark::State& state)
 
     auto i_end = state.range(0);
     for (int i = 0; i < i_end; i++)
-      results.push_back(pool.run(
-        [i]() { std::this_thread::sleep_for(std::chrono::microseconds(10)); }));
+      results.push_back(
+        pool.run([i]() { std::this_thread::sleep_for(std::chrono::microseconds(10)); }));
     for (int i = 0; i < i_end; i++)
       results[i].get();
   }

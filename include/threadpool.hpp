@@ -15,22 +15,22 @@
 
 #include "hooks.hpp"
 
-#define CALL_HOOK_WORKER(HOOK)                                                 \
-  do                                                                           \
-  {                                                                            \
-    if (pool->hooks)                                                           \
-    {                                                                          \
-      pool->hooks->HOOK();                                                     \
-    }                                                                          \
+#define CALL_HOOK_WORKER(HOOK)                                                                     \
+  do                                                                                               \
+  {                                                                                                \
+    if (pool->hooks)                                                                               \
+    {                                                                                              \
+      pool->hooks->HOOK();                                                                         \
+    }                                                                                              \
   } while (0)
 
-#define CALL_HOOK_POOL(HOOK)                                                   \
-  do                                                                           \
-  {                                                                            \
-    if (hooks)                                                                 \
-    {                                                                          \
-      hooks->HOOK();                                                           \
-    }                                                                          \
+#define CALL_HOOK_POOL(HOOK)                                                                       \
+  do                                                                                               \
+  {                                                                                                \
+    if (hooks)                                                                                     \
+    {                                                                                              \
+      hooks->HOOK();                                                                               \
+    }                                                                                              \
   } while (0)
 
 namespace ThreadPool
@@ -175,8 +175,9 @@ private:
   public:
     /*! \brief Construct a worker.
      *  \param pool The ThreadPool the worker works for.
+     *  \param idx
      */
-    explicit Worker(ThreadPool* pool);
+    explicit Worker(ThreadPool* pool, std::size_t idx);
 
     /*! \brief Poll task from the queue.
      *  \param nb_task Number of tasks to run and then exit. If 0 then run until
@@ -226,7 +227,10 @@ private:
     ThreadPool* pool;
 
     std::atomic<bool> stopped;
+
     std::atomic<bool> started;
+
+    const std::size_t idx;
   };
 
   /*! \brief Check if the pool can spawn more workers, and spawn one for a
@@ -269,8 +273,7 @@ private:
   const std::size_t pool_size;
 };
 
-// ThreadPool implementation
-
+// ThreadPool impl
 inline ThreadPool::ThreadPool()
   : ThreadPool(std::thread::hardware_concurrency(), nullptr)
 {
@@ -286,8 +289,7 @@ inline ThreadPool::ThreadPool(std::shared_ptr<Hooks> hooks)
 {
 }
 
-inline ThreadPool::ThreadPool(std::size_t pool_size,
-                              std::shared_ptr<Hooks> hooks)
+inline ThreadPool::ThreadPool(std::size_t pool_size, std::shared_ptr<Hooks> hooks)
   : waiting_threads(0)
   , working_threads(0)
   , stopped(false)
@@ -348,10 +350,69 @@ inline void ThreadPool::dispatch_work(const std::size_t idx, TaskType task)
   worker.second->cv_variable.notify_one();
 }
 
-inline ThreadPool::Worker::Worker(ThreadPool* pool)
+inline void ThreadPool::stop()
+{
+  stopped = true;
+  std::lock_guard<decltype(pool_lock)> pl(pool_lock);
+  for (const auto& w : pool)
+  {
+    w.second->stop();
+  }
+}
+
+inline void ThreadPool::terminate()
+{
+  std::lock_guard<decltype(pool_lock)> pl(pool_lock);
+  // Join everything
+  for (auto& w : pool)
+  {
+    w.first.join();
+    CALL_HOOK_POOL(on_worker_die);
+  }
+}
+
+inline void ThreadPool::start_pool()
+{
+  std::lock_guard<decltype(pool_lock)> pl(pool_lock);
+  for (std::size_t i = 0; i < pool_size; i++)
+  {
+    auto w = std::unique_ptr<Worker>(new Worker(this, i));
+    pool.emplace_back(std::ref(*w), std::move(w));
+    CALL_HOOK_POOL(on_worker_add);
+  }
+
+  for (auto& w : pool)
+  {
+    w.second->start();
+  }
+}
+
+inline bool ThreadPool::is_stopped() const noexcept
+{
+  return stopped;
+}
+
+inline std::size_t ThreadPool::threads_available() const noexcept
+{
+  return waiting_threads.load();
+}
+
+inline std::size_t ThreadPool::threads_working() const noexcept
+{
+  return working_threads.load();
+}
+
+inline void ThreadPool::register_hooks(std::shared_ptr<Hooks> hooks)
+{
+  this->hooks = hooks;
+}
+
+// Worker impl
+inline ThreadPool::Worker::Worker(ThreadPool* pool, std::size_t idx)
   : pool(pool)
   , stopped(false)
   , started(false)
+  , idx(idx)
 {
 }
 
@@ -391,7 +452,8 @@ inline std::pair<bool, ThreadPool::task_type> ThreadPool::Worker::find_task()
 {
   for (;;)
   {
-    /*if (queue_size == 0)
+#ifndef THREADPOOL_DISABLE_WORK_STEALING
+    if (tasks.empty())
     {
       // Try work stealing
       auto res = std::move(work_steal());
@@ -399,12 +461,12 @@ inline std::pair<bool, ThreadPool::task_type> ThreadPool::Worker::find_task()
       {
         return res;
       }
-    }*/
+    }
+#endif
 
     // Wait for a task in our queue
     std::unique_lock<decltype(tasks_lock)> lock(tasks_lock);
-    cv_variable.wait(
-      lock, [&] { return pool->stopped || this->stopped || !tasks.empty(); });
+    cv_variable.wait(lock, [&] { return pool->stopped || this->stopped || !tasks.empty(); });
 
     // Pool is stopped
     if (pool->stopped || this->stopped)
@@ -418,7 +480,40 @@ inline std::pair<bool, ThreadPool::task_type> ThreadPool::Worker::find_task()
 
 inline std::pair<bool, ThreadPool::task_type> ThreadPool::Worker::work_steal()
 {
-  /*std::lock_guard<decltype(pool_lock)> lk(pool->pool_lock);
+#ifndef THREADPOOL_DISABLE_NEIGHBORS_WORK_STEALING
+  if (pool->stopped || this->stopped)
+  {
+    return std::pair<bool, task_type>(false, task_type{});
+  }
+
+  if (idx > 0)
+  {
+    auto& worker = pool->pool[idx - 1];
+    if (worker.second->queue_size != 0)
+    {
+      std::unique_lock<decltype(Worker::tasks_lock)> lk(worker.second->tasks_lock,
+                                                        std::try_to_lock);
+      if (lk.owns_lock() && !worker.second->tasks.empty())
+      {
+        return std::pair<bool, task_type>(true, extract_task(worker.second->tasks));
+      }
+    }
+  }
+
+  if (idx < (pool->pool.size() - 1))
+  {
+    auto& worker = pool->pool[idx + 1];
+    if (worker.second->queue_size != 0)
+    {
+      std::unique_lock<decltype(Worker::tasks_lock)> lk(worker.second->tasks_lock,
+                                                        std::try_to_lock);
+      if (lk.owns_lock() && !worker.second->tasks.empty())
+      {
+        return std::pair<bool, task_type>(true, extract_task(worker.second->tasks));
+      }
+    }
+  }
+#else
   for (auto& w : pool->pool)
   {
     if (pool->stopped || this->stopped)
@@ -426,17 +521,17 @@ inline std::pair<bool, ThreadPool::task_type> ThreadPool::Worker::work_steal()
       return std::pair<bool, task_type>(false, task_type{});
     }
 
-    if (w.second->queue_size == 0)
+    // FIXME: add try lock
+    std::lock_guard<decltype(Worker::tasks_lock)> lk(w.second->tasks_lock);
+    if (w.second->tasks.empty())
     {
       continue;
     }
 
-    // FIXME: add try lock
-    std::lock_guard<decltype(Worker::tasks_lock)> lk(w.second->tasks_lock);
-
-    return std::pair<bool, task_type>(true, extract_task(tasks));
+    return std::pair<bool, task_type>(true, extract_task(w.second->tasks));
   }
-  return std::pair<bool, task_type>(false, task_type{});*/
+#endif
+  return std::pair<bool, task_type>(false, task_type{});
 }
 
 inline ThreadPool::task_type
@@ -446,63 +541,6 @@ ThreadPool::Worker::extract_task(std::queue<ThreadPool::task_type>& task_queue)
   task_queue.pop();
   queue_size--;
   return task;
-}
-
-inline void ThreadPool::stop()
-{
-  stopped = true;
-  std::lock_guard<decltype(pool_lock)> pl(pool_lock);
-  for (const auto& w : pool)
-  {
-    w.second->stop();
-  }
-}
-
-inline void ThreadPool::terminate()
-{
-  std::lock_guard<decltype(pool_lock)> pl(pool_lock);
-  // Join everything
-  for (auto& w : pool)
-  {
-    w.first.join();
-    CALL_HOOK_POOL(on_worker_die);
-  }
-}
-
-inline void ThreadPool::start_pool()
-{
-  std::lock_guard<decltype(pool_lock)> pl(pool_lock);
-  for (std::size_t i = 0; i < pool_size; i++)
-  {
-    auto w = std::unique_ptr<Worker>(new Worker(this));
-    pool.emplace_back(std::ref(*w), std::move(w));
-    CALL_HOOK_POOL(on_worker_add);
-  }
-
-  for (auto& w : pool)
-  {
-    w.second->start();
-  }
-}
-
-inline bool ThreadPool::is_stopped() const noexcept
-{
-  return stopped;
-}
-
-inline std::size_t ThreadPool::threads_available() const noexcept
-{
-  return waiting_threads.load();
-}
-
-inline std::size_t ThreadPool::threads_working() const noexcept
-{
-  return working_threads.load();
-}
-
-inline void ThreadPool::register_hooks(std::shared_ptr<Hooks> hooks)
-{
-  this->hooks = hooks;
 }
 
 inline void ThreadPool::Worker::stop()
@@ -527,5 +565,4 @@ inline bool ThreadPool::Worker::is_stopped() const noexcept
 {
   return stopped;
 }
-
 } // namespace ThreadPool
