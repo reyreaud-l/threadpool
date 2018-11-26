@@ -1,19 +1,23 @@
-include(GTest)
+if (DOWNLOAD_DEPENDENCIES)
+  include(GTest)
+else()
+  find_package(GTest REQUIRED)
+endif()
 
-set(TESTS_EXEC tests)
-add_executable(${TESTS_EXEC}
+add_executable(tests
+  EXCLUDE_FROM_ALL
   main.cpp
-  single_thread.cpp
-  multiple_thread.cpp
-  variable_thread.cpp
-  hooks.cpp
+  threadpool_test.cpp
+  hooks_test.cpp
 )
-
-target_link_libraries(${TESTS_EXEC} PRIVATE
-  gtest_main
+target_compile_options(tests PRIVATE -std=c++11)
+target_link_libraries(tests PRIVATE
+  GTest::GTest
   Threads::Threads
 )
-target_include_directories(${TESTS_EXEC} PRIVATE ${CMAKE_SOURCE_DIR}/include
-  ${CMAKE_SOURCE_DIR}/tests)
+target_include_directories(tests PRIVATE
+  ${CMAKE_SOURCE_DIR}/tests
+  ${CMAKE_SOURCE_DIR}/include
+)
 
-add_custom_target(check ${TESTS_EXEC} DEPENDS ${TESTS_EXEC} COMMENT "Running tests...")
+add_custom_target(check tests DEPENDS tests COMMENT "Running tests...")

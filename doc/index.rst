@@ -17,6 +17,7 @@ You can find all code examples in the repository under :code:`doc/src/examples`.
 
    src/getting_started
    src/pool_control
+   src/performance
    src/hooks
    src/all_doc
    src/changelog

@@ -8,21 +8,35 @@ addons:
     packages:
       - cmake
 
-script:
+script: &test_script
   - if [ $TRAVIS_OS_NAME = "osx" ]; then brew update >/dev/null; fi
-  - if [ $TRAVIS_OS_NAME = "osx" ] && [ $BREW_SKIP = "false" ]; then brew install $BREW_INSTALL; fi
   - if [ $TRAVIS_OS_NAME = "osx" ]; then brew upgrade cmake; fi
   - mkdir build
   - cd build
-  - cmake -DBUILD_TESTS=ON -DBUILD_EXAMPLES=ON ..
+  - cmake -DBUILD_TESTS=ON -DDOWNLOAD_DEPENDENCIES=ON -DCMAKE_BUILD_TYPE=RELEASE -DBUILD_EXAMPLES=ON -DCMAKE_INSTALL_PREFIX=threadpool-${TRAVIS_TAG} ..
   - make check
-  - make examples
+    
+before_deploy:
+  - make install
+  - tar -cvjf ../threadpool-${TRAVIS_TAG}.tar.bz2 threadpool-${TRAVIS_TAG}
+  - cd ..
+  - |
+    if [ "$TRAVIS_OS_NAME" = "osx" ]; then
+      brew install gnu-tar --with-default-names
+      export PATH="/usr/local/bin:$PATH"
+    fi
+  - ./cmake/git-archive-all.sh --prefix threadpool-${TRAVIS_TAG} threadpool-${TRAVIS_TAG}.tar && bzip2 $_
 
-matrix:
+
+stages:
+  - "Tests"
+
+jobs:
   fast_finish: true
   include:
     # Begin gcc
     - os: linux
+      stage: "Tests"
       name: "Linux GCC 4.9"
       addons:
         apt:
@@ -33,8 +47,10 @@ matrix:
       env:
         - CC=gcc-4.9
         - CXX=g++-4.9
+      script: *test_script
 
     - os: linux
+      stage: "Tests"
       name: "Linux GCC 5"
       addons:
         apt:
@@ -45,8 +61,10 @@ matrix:
       env:
         - CC=gcc-5
         - CXX=g++-5
+      script: *test_script
 
     - os: linux
+      stage: "Tests"
       name: "Linux GCC 6"
       addons:
         apt:
@@ -57,8 +75,10 @@ matrix:
       env:
         - CC=gcc-6
         - CXX=g++-6
+      script: *test_script
 
     - os: linux
+      stage: "Tests"
       name: "Linux GCC 7"
       addons:
         apt:
@@ -69,10 +89,27 @@ matrix:
       env:
         - CC=gcc-7
         - CXX=g++-7
+      script: *test_script
+
+    - os: linux
+      stage: "Tests"
+      name: "Linux GCC 8"
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-8
+      env:
+        - CC=gcc-8
+        - CXX=g++-8
+        - DEPLOY=true
+      script: *test_script
     # End gcc
 
     # Begin Clang
     - os: linux
+      stage: "Tests"
       name: "Linux Clang 3.6"
       addons:
         apt:
@@ -84,8 +121,10 @@ matrix:
       env:
         - CC=clang-3.6
         - CXX=clang++-3.6
+      script: *test_script
 
     - os: linux
+      stage: "Tests"
       name: "Linux Clang 3.7"
       addons:
         apt:
@@ -97,8 +136,10 @@ matrix:
       env:
         - CC=clang-3.7
         - CXX=clang++-3.7
+      script: *test_script
 
     - os: linux
+      stage: "Tests"
       name: "Linux Clang 3.8"
       addons:
         apt:
@@ -110,8 +151,10 @@ matrix:
       env:
         - CC=clang-3.8
         - CXX=clang++-3.8
+      script: *test_script
 
     - os: linux
+      stage: "Tests"
       name: "Linux Clang 3.9"
       addons:
         apt:
@@ -122,8 +165,10 @@ matrix:
       env:
         - CC=clang-3.9
         - CXX=clang++-3.9
+      script: *test_script
 
     - os: linux
+      stage: "Tests"
       name: "Linux Clang 4.0"
       addons:
         apt:
@@ -134,8 +179,10 @@ matrix:
       env:
         - CC=clang-4.0
         - CXX=clang++-4.0
+      script: *test_script
 
     - os: linux
+      stage: "Tests"
       name: "Linux Clang 5.0"
       addons:
         apt:
@@ -146,50 +193,101 @@ matrix:
       env:
         - CC=clang-5.0
         - CXX=clang++-5.0
+      script: *test_script
+
+    - os: linux
+      stage: "Tests"
+      name: "Linux Clang 6.0"
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-6.0
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-6
+            - clang-6.0
+      env:
+        - CC=clang-6.0
+        - CXX=clang++-6.0
+      script: *test_script
     # End Clang
 
-    # Begin gcc OSX
+    # Begin OSX
     - os: osx
-      name: "OSX GCC 5"
-      osx_image: xcode8
-      env:
-        - BREW_SKIP=false
-        - BREW_INSTALL=gcc@5
-        - CC=gcc-5
-        - CXX=g++-5
+      stage: "Tests"
+      name: "OSX Clang xcode7.3"
+      osx_image: xcode7.3
+      script: *test_script
 
     - os: osx
-      name: "OSX GCC 6"
+      stage: "Tests"
+      name: "OSX Clang xcode8"
       osx_image: xcode8
-      env:
-        - BREW_SKIP=false
-        - BREW_INSTALL=gcc@6
-        - CC=gcc-6
-        - CXX=g++-6
+      script: *test_script
 
     - os: osx
-      name: "OSX GCC 7"
-      osx_image: xcode8
-      env:
-        - BREW_SKIP=false
-        - BREW_INSTALL=gcc@7
-        - CC=gcc-7
-        - CXX=g++-7
-    # End gcc OSX
+      stage: "Tests"
+      name: "OSX Clang xcode8.1"
+      osx_image: xcode8.1
+      script: *test_script
 
-    # Begin clang OSX
     - os: osx
+      stage: "Tests"
+      name: "OSX Clang xcode8.2"
+      osx_image: xcode8.2
+      script: *test_script
+
+    - os: osx
+      stage: "Tests"
       name: "OSX Clang xcode8.3"
       osx_image: xcode8.3
-      compiler: clang
-      env:
-        - BREW_SKIP=true
+      script: *test_script
 
     - os: osx
+      stage: "Tests"
+      name: "OSX Clang xcode9"
+      osx_image: xcode9
+      script: *test_script
+
+    - os: osx
+      stage: "Tests"
       name: "OSX Clang xcode9.1"
       osx_image: xcode9.1
-      compiler: clang
-      env:
-        - BREW_SKIP=true
+      script: *test_script
+
+    - os: osx
+      stage: "Tests"
+      name: "OSX Clang xcode9.2"
+      osx_image: xcode9.2
+      script: *test_script
+
+    - os: osx
+      stage: "Tests"
+      name: "OSX Clang xcode9.3"
+      osx_image: xcode9.3
+      script: *test_script
+
+    - os: osx
+      stage: "Tests"
+      name: "OSX Clang xcode9.4"
+      osx_image: xcode9.4
+      script: *test_script
+
+    - os: osx
+      stage: "Tests"
+      name: "OSX Clang xcode10"
+      osx_image: xcode10
+      script: *test_script
     # End clang OSX
 
+deploy:
+  provider: releases
+  skip_cleanup: true
+  api_key:
+    secure: I4wjzzMfonwvc7JCuhPDg3SNQ68b1Sz1r3jCu9UcHiCu90mpMTv0dxow1QTI/DCk7zH8DB9nA3KTvRABqcwlaVh/VIHy6ZJRrRqDl0QtqL5Ecq4BbdvSEz8Q9ShwGumFj/nlZ58FP+KrUZeR37HWL3Sej7r9nQm7/N6UpaPmzYVkrsHz6dS5n0HRBM6mgCUKc7R9oWkzEQ0ywcNQF6S4YH6yTFYMRQDh9XBDFqw7H5UzkWhKh7UNU1xIwsMWt+8zQyH50SsddsES8+JJQIxy/tguTXXAKFL+yHWyGBwKe9Ij8lRl7J6KF2QVJeCYscgyJl1oF8OC56lUiZ8tRmW4kIWeIFX2QyGQcj6VqrpTD1wve32E4k95nc5YzhfBCLsjIOvCcO2TcALXibuywFs8Dn/nyWRpj2P4YAaKXAMTlJnj+ITPbU9N+Sd27GlU8HHFrSXERL5AkN+4TOOw+oHXjyRwkkJxXrxkMfHjwXKwaDV2sm9oHGKurQFAfyZMbiPld+L0gDV3C6thslCJj0FBRNN/L7xsywOVV7JV3woAzyUxSLFFDPHSF/SCJZawGet/ogwnXom/dgSj/7vlg8RI9ymDL+XgNOw90CHY9rgHKZo+Fvsatl9jIm/MyA3Y7iMjXHw6MyMv2mbiJiGLmxAsGRPzy+1LMViHcgStByZ1fAM=
+  file:
+    - threadpool-${TRAVIS_TAG}.tar.bz2
+  on:
+    tags: true
+    repo: reyreaud-l/threadpool
+    condition: $DEPLOY = true

@@ -9,6 +9,29 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ----------
 
+[3.0.0] - 2018-11-26
+----------
+Added
+~~~~~~~
+- Added overloading constructor which deducts number of available thread from
+  the hardware.
+- All code now lies in the :code:`ThreadPool` namespace.
+- Add an option to either download dependencies or use system wide install.
+- Added work stealing in the ThreadPool to increase performance.
+- Add multiple macros to select whether or not you wish to enable work stealing.
+
+Changed
+~~~~~~~
+- ThreadPool implementation is now using multiple queues with multiple workers.
+- Remove hook copy overload (it was wrong)
+- Changed dependency management (gtest/gbench) to be downloaded at compile time
+  and not at configure time.
+
+Removed
+~~~~~~~
+- The ThreadPool is now a fixed size pool. I removed the ability to adapt the
+  number of threads at runtime.
+
 [2.0.0] - 2018-09-21
 --------------------
 Added
@@ -38,6 +61,7 @@ Added
 
 List of releases
 ----------------
-- `Unreleased <https://github.com/reyreaud-l/threadpool/compare/v1.0.0...HEAD>`_
+- `Unreleased <https://github.com/reyreaud-l/threadpool/compare/v3.0.0...HEAD>`_
+- `3.0.0 <https://github.com/reyreaud-l/threadpool/compare/v2.0.0...v3.0.0>`_
 - `2.0.0 <https://github.com/reyreaud-l/threadpool/compare/v1.0.0...v2.0.0>`_
 - `1.0.0 <https://github.com/reyreaud-l/threadpool/compare/3e51279...v1.0.0>`_

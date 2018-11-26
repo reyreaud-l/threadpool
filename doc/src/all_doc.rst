@@ -1,17 +1,17 @@
 ThreadPool Doxygen
 ==================
 
-Public interface
-----------------
+Public ThreadPool
+-----------------
 
-.. doxygenclass:: ThreadPool
+.. doxygenclass:: ThreadPool::ThreadPool
    :members:
    :protected-members:
    :no-link:
 
-Private
--------
+Private ThreadPool
+------------------
 
-.. doxygenclass:: ThreadPool
+.. doxygenclass:: ThreadPool::ThreadPool
    :private-members:
    :no-link:

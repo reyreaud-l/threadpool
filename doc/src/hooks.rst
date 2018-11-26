@@ -19,10 +19,9 @@ Workers Hooks
 Registering hooks
 -----------------
 Hooks can be used to be notified when actions happens in the pool. The hooks are
-registered in the pool using the functions:
+registered in the pool using the function:
 
-.. doxygenfunction:: ThreadPool::register_hooks(ThreadPool::Hooks)
-.. doxygenfunction:: ThreadPool::register_hooks(std::shared_ptr<ThreadPool::Hooks>)
+.. doxygenfunction:: ThreadPool::ThreadPool::register_hooks(std::shared_ptr<ThreadPool::Hooks>)
 
 Example
 -------
