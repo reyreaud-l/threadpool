@@ -18,7 +18,7 @@ script: &test_script
     
 before_deploy:
   - make install
-  - tar -cvjf ../threadpool-${TRAVIS_TAG}.tar.bz2 threadpool-${TRAVIS_TAG}
+  - tar -cvjf ../threadpool-${TRAVIS_TAG}-all_arch.tar.bz2 threadpool-${TRAVIS_TAG}
   - cd ..
   - |
     if [ "$TRAVIS_OS_NAME" = "osx" ]; then
