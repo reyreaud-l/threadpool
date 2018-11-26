@@ -377,7 +377,8 @@ inline void ThreadPool::start_pool()
   for (std::size_t i = 0; i < pool_size; i++)
   {
     auto w = std::unique_ptr<Worker>(new Worker(this, i));
-    pool.emplace_back(std::ref(*w), std::move(w));
+    pool.push_back(
+      std::pair<std::thread, std::unique_ptr<Worker>>(std::thread(std::ref(*w)), std::move(w)));
     CALL_HOOK_POOL(on_worker_add);
   }
 
@@ -456,7 +457,7 @@ inline std::pair<bool, ThreadPool::task_type> ThreadPool::Worker::find_task()
     if (tasks.empty())
     {
       // Try work stealing
-      auto res = std::move(work_steal());
+      auto res = work_steal();
       if (res.first)
       {
         return res;
