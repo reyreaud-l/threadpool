@@ -47,8 +47,9 @@ endif()
 if(ClangTidy)
   add_custom_target(tidy
     COMMAND ${ClangTidy}
-    "-checks=-*,modernize-*,cppcoreguidelines-*,google-*,-google-readability-todo"
-    "-warnings-as-errors=*" ${TIDY_SOURCES}
+    "-checks=-*,modernize-*,cppcoreguidelines-*,google-*,-google-readability-todo,\
+    -modernize-pass-by-value"
+    "-warnings-as-errors=*"${TIDY_SOURCES}
     COMMENT "Running static check..."
   )
 endif()

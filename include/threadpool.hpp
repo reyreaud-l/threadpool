@@ -65,6 +65,22 @@ public:
    */
   ThreadPool(std::size_t pool_size, std::shared_ptr<Hooks> hooks);
 
+  /*! Default copy constructor
+   */
+  ThreadPool(const ThreadPool&) = delete;
+
+  /*! Default move constructor
+   */
+  ThreadPool(ThreadPool&&) = default;
+
+  /*! Default copy assignment
+   */
+  ThreadPool& operator=(const ThreadPool&) = delete;
+
+  /*! Default move assignment
+   */
+  ThreadPool& operator=(ThreadPool&&) = default;
+
   /*! \brief Stops the pool and clean all workers.
    */
   ~ThreadPool();
@@ -215,7 +231,7 @@ private:
     std::atomic<std::size_t> queue_size;
 
   private:
-    task_type extract_task(std::queue<task_type>& task_queue);
+    task_type extract_task(std::queue<task_type>* task_queue);
     std::pair<bool, task_type> work_steal();
     std::pair<bool, task_type> find_task();
     void wait_for_start();
@@ -374,8 +390,12 @@ inline void ThreadPool::start_pool()
   std::lock_guard<decltype(pool_lock)> pl(pool_lock);
   for (std::size_t i = 0; i < pool_size; i++)
   {
+#ifdef __cpp_lib_make_unique
+    auto w = std::make_unique<Worker>(this, i);
+#else
     auto w = std::unique_ptr<Worker>(new Worker(this, i));
-    pool.push_back(
+#endif
+    pool.emplace_back(
       std::pair<std::thread, std::unique_ptr<Worker>>(std::thread(std::ref(*w)), std::move(w)));
     CALL_HOOK_POOL(on_worker_add);
   }
@@ -408,7 +428,8 @@ inline void ThreadPool::register_hooks(std::shared_ptr<Hooks> hooks)
 
 // Worker impl
 inline ThreadPool::Worker::Worker(ThreadPool* pool, std::size_t idx)
-  : pool(pool)
+  : queue_size(0)
+  , pool(pool)
   , stopped(false)
   , started(false)
   , idx(idx)
@@ -473,7 +494,7 @@ inline std::pair<bool, ThreadPool::task_type> ThreadPool::Worker::find_task()
       return std::pair<bool, task_type>(false, task_type{});
     }
 
-    return std::pair<bool, task_type>(true, extract_task(tasks));
+    return std::pair<bool, task_type>(true, extract_task(&tasks));
   }
 }
 
@@ -494,7 +515,7 @@ inline std::pair<bool, ThreadPool::task_type> ThreadPool::Worker::work_steal()
                                                         std::try_to_lock);
       if (lk.owns_lock() && !worker.second->tasks.empty())
       {
-        return std::pair<bool, task_type>(true, extract_task(worker.second->tasks));
+        return std::pair<bool, task_type>(true, extract_task(&(worker.second->tasks)));
       }
     }
   }
@@ -508,7 +529,7 @@ inline std::pair<bool, ThreadPool::task_type> ThreadPool::Worker::work_steal()
                                                         std::try_to_lock);
       if (lk.owns_lock() && !worker.second->tasks.empty())
       {
-        return std::pair<bool, task_type>(true, extract_task(worker.second->tasks));
+        return std::pair<bool, task_type>(true, extract_task(&(worker.second->tasks)));
       }
     }
   }
@@ -527,17 +548,17 @@ inline std::pair<bool, ThreadPool::task_type> ThreadPool::Worker::work_steal()
       continue;
     }
 
-    return std::pair<bool, task_type>(true, extract_task(w.second->tasks));
+    return std::pair<bool, task_type>(true, extract_task(&(w.second->tasks)));
   }
 #endif
   return std::pair<bool, task_type>(false, task_type{});
 }
 
 inline ThreadPool::task_type
-ThreadPool::Worker::extract_task(std::queue<ThreadPool::task_type>& task_queue)
+ThreadPool::Worker::extract_task(std::queue<ThreadPool::task_type>* task_queue)
 {
-  task_type task = std::move(task_queue.front());
-  task_queue.pop();
+  task_type task = std::move(task_queue->front());
+  task_queue->pop();
   queue_size--;
   return task;
 }

@@ -19,6 +19,22 @@ struct Hooks
    */
   Hooks() = default;
 
+  /*! \brief Default copy constructor
+   */
+  Hooks(const Hooks&) = default;
+
+  /*! \brief Default move constructor
+   */
+  Hooks(Hooks&&) = default;
+
+  /*! \brief Default copy assignment
+   */
+  Hooks& operator=(const Hooks&) = default;
+
+  /*! \brief Default move assignment
+   */
+  Hooks& operator=(Hooks&&) = default;
+
   /*! \brief Default virtual destructor.
    *
    *  Make sure user defined destructor will be called.
