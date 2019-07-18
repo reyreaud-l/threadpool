@@ -49,7 +49,7 @@ if(ClangTidy)
     COMMAND ${ClangTidy}
     "-checks=-*,modernize-*,cppcoreguidelines-*,google-*,-google-readability-todo,\
     -modernize-pass-by-value"
-    "-warnings-as-errors=*"${TIDY_SOURCES}
+    "-warnings-as-errors=*" ${TIDY_SOURCES}
     COMMENT "Running static check..."
   )
 endif()
