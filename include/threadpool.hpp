@@ -360,7 +360,7 @@ inline void ThreadPool::dispatch_work(const std::size_t idx, TaskType task)
     std::lock_guard<decltype(Worker::tasks_lock)> lk(worker.second->tasks_lock);
     worker.second->tasks.emplace(std::move(task));
   }
-  worker.second->queue_size--;
+  worker.second->queue_size++;
   worker.second->cv_variable.notify_one();
 }
 
