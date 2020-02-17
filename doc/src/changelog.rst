@@ -8,6 +8,8 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 
 Unreleased
 ----------
+- Corrected typenames when forwarding. Should avoid compilation issues in Visual
+  Studio 2017/2018
 
 [3.0.0] - 2018-11-26
 ----------
